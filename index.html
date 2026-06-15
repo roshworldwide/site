@@ -141,52 +141,63 @@
   </div>
 
   <main id="top" tabindex="-1">
-    <!-- ============ HERO (text-only; sequence below it) ============ -->
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero__inner">
-        <p class="eyebrow reveal" data-reveal>Systems &amp; ML Engineer · Inventor</p>
-        <h1 class="hero__title display" id="hero-title">
-          <span class="reveal" data-reveal>Systems that work</span>
-          <span class="reveal accent-em" data-reveal style="--d:.06s">where the internet can't reach.</span>
-        </h1>
-        <p class="hero__lede reveal" data-reveal style="--d:.12s">
-          I'm Roshan. I build air-gapped AI, quant ML, and on-device systems, and take them from
-          prototype to production. Inventor on 7 patent applications.
-        </p>
-        <div class="hero__actions reveal" data-reveal style="--d:.18s">
-          <a class="btn btn--primary" href="#contact" data-magnetic>
-            <span>Let's talk</span>
-            <span class="btn__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
-            </span>
-          </a>
-          <a class="btn btn--ghost" href="#work" data-magnetic>
-            <span>View work</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ SCROLL-SCRUBBED SEQUENCE (opening section) ============ -->
-    <!-- 227-frame WebP sequence in assets/sequence/, drawn to canvas by scroll position -->
-    <section class="seq" id="sequence" aria-label="Showreel">
+    <!-- ============ OPENING: hero fused into the scroll sequence ============ -->
+    <!-- One continuous open: the headline rests on the blacked-out first frame, then -->
+    <!-- parallaxes out as the 227-frame WebP reel lights up. Everything below is driven -->
+    <!-- by seqTick's scroll progress p (no extra scroll listener / rAF). In reduced-motion -->
+    <!-- or on small screens .seq__hero flows as a normal static hero above the poster. -->
+    <section class="seq" id="sequence" aria-labelledby="hero-title">
       <div class="seq__pin">
+        <!-- headline overlay: real DOM, the page's only h1; first child so it flows first when static -->
+        <div class="seq__hero" id="seq-hero">
+          <div class="hero__inner">
+            <p class="eyebrow reveal" data-reveal>Systems &amp; ML Engineer · Inventor</p>
+            <h1 class="hero__title display" id="hero-title">
+              <span class="reveal" data-reveal>Systems that work</span>
+              <span class="reveal accent-em" data-reveal style="--d:.06s">where the internet can't reach.</span>
+            </h1>
+            <p class="hero__lede reveal" data-reveal style="--d:.12s">
+              I'm Roshan. I build air-gapped AI, quant ML, and on-device systems, and take them from
+              prototype to production. Inventor on 7 patent applications.
+            </p>
+            <div class="hero__actions reveal" data-reveal style="--d:.18s">
+              <a class="btn btn--primary" href="#contact" data-magnetic>
+                <span>Let's talk</span>
+                <span class="btn__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+                </span>
+              </a>
+              <a class="btn btn--ghost" href="#work" data-magnetic>
+                <span>View work</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
         <img class="seq__poster" src="assets/sequence/poster.webp" alt="" aria-hidden="true" width="1280" height="720" decoding="async" />
         <canvas class="seq__canvas" id="seq-canvas" aria-hidden="true"></canvas>
         <div class="seq__veil" aria-hidden="true"></div>
+        <!-- opening curtain: near-opaque Vault at rest so the headline reads on near-black; -->
+        <!-- JS lifts its opacity to 0 by p~=0.20 so the reel brightens as you descend -->
+        <div class="seq__open" id="seq-open" aria-hidden="true"></div>
+
+        <!-- chapters: cross-fade later in the scroll; headline owns the opening -->
+        <div class="seq__chapters">
+          <div class="seq__chapter" data-at="0.40"><h2 class="display">From prototype</h2><p>where the idea begins.</p></div>
+          <div class="seq__chapter" data-at="0.66"><h2 class="display">To production</h2><p>fast, reliable, real.</p></div>
+          <div class="seq__chapter" data-at="0.90"><h2 class="display">At scale</h2><p>built to last.</p></div>
+        </div>
+
+        <div class="seq__rail" aria-hidden="true"><span class="seq__rail-fill" id="seq-rail"></span></div>
 
         <div class="seq__loader" id="seq-loader" aria-hidden="true">
           <span class="seq__loader-num" id="seq-loader-num">0</span><span class="seq__loader-pct">%</span>
         </div>
 
-        <!-- chapters: cross-fade at scroll thresholds; placeholder copy -->
-        <div class="seq__chapters">
-          <div class="seq__chapter" data-at="0.12"><h2 class="display">From prototype</h2><p>where the idea begins.</p></div>
-          <div class="seq__chapter" data-at="0.5"><h2 class="display">To production</h2><p>fast, reliable, real.</p></div>
-          <div class="seq__chapter" data-at="0.85"><h2 class="display">At scale</h2><p>built to last.</p></div>
+        <!-- restrained scroll cue at rest; JS fades it on the first scroll -->
+        <div class="seq__cue" id="seq-cue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
-
-        <div class="seq__rail" aria-hidden="true"><span class="seq__rail-fill" id="seq-rail"></span></div>
       </div>
     </section>
 
@@ -217,15 +228,15 @@
         <p class="eyebrow" data-reveal>
           Selected work
         </p>
-        <h2 class="sec-title display" id="work-title" data-reveal>
-          Systems I have built.
+        <h2 class="sec-title display reveal-wipe" id="work-title" data-reveal>
+          <span class="wipe-line">Systems I have built.</span>
         </h2>
       </header>
 
       <!-- Real projects. Honest status pills; no links until a repo is public. -->
       <div class="bento">
-        <article class="card card--feature" data-reveal data-tilt>
-          <div class="card__inner">
+        <article class="card card--feature">
+          <div class="card__inner" data-tilt>
             <div class="card__media card__media--g1" aria-hidden="true"></div>
             <div class="card__body">
               <div class="card__meta">
@@ -239,8 +250,8 @@
           </div>
         </article>
 
-        <article class="card" data-reveal data-tilt>
-          <div class="card__inner">
+        <article class="card">
+          <div class="card__inner" data-tilt>
             <div class="card__media card__media--g2" aria-hidden="true"></div>
             <div class="card__body">
               <div class="card__meta">
@@ -254,8 +265,8 @@
           </div>
         </article>
 
-        <article class="card" data-reveal data-tilt>
-          <div class="card__inner">
+        <article class="card">
+          <div class="card__inner" data-tilt>
             <div class="card__media card__media--g3" aria-hidden="true"></div>
             <div class="card__body">
               <div class="card__meta">
@@ -269,8 +280,8 @@
           </div>
         </article>
 
-        <article class="card" data-reveal data-tilt>
-          <div class="card__inner">
+        <article class="card">
+          <div class="card__inner" data-tilt>
             <div class="card__media card__media--g4" aria-hidden="true"></div>
             <div class="card__body">
               <div class="card__meta">
@@ -284,8 +295,8 @@
           </div>
         </article>
 
-        <article class="card" data-reveal data-tilt>
-          <div class="card__inner">
+        <article class="card">
+          <div class="card__inner" data-tilt>
             <div class="card__media card__media--g5" aria-hidden="true"></div>
             <div class="card__body">
               <div class="card__meta">
@@ -305,7 +316,7 @@
     <section class="patents shell" id="patents" aria-labelledby="patents-title">
       <header class="sec-head patents__head">
         <p class="eyebrow" data-reveal>Inventions</p>
-        <h2 class="sec-title display" id="patents-title" data-reveal>Seven patents, on file.</h2>
+        <h2 class="sec-title display reveal-wipe" id="patents-title" data-reveal><span class="wipe-line">Seven patents, on file.</span></h2>
         <p class="patents__sub" data-reveal>7 patent applications, submitted for filing.</p>
         <ul class="patents__domains" data-reveal aria-label="Domains covered">
           <li>Privacy</li>
@@ -318,7 +329,8 @@
       </header>
 
       <div class="patents__grid">
-        <article class="patent" data-reveal>
+        <span class="patents__scan" aria-hidden="true"></span>
+        <article class="patent">
           <div class="patent__top">
             <span class="patent__no">No. 01</span>
             <span class="patent__tag">Privacy</span>
@@ -327,7 +339,7 @@
           <p class="patent__desc">Reproduces production crashes from path-equivalent synthetic inputs, with zero bytes of user data transmitted.</p>
         </article>
 
-        <article class="patent" data-reveal>
+        <article class="patent">
           <div class="patent__top">
             <span class="patent__no">No. 02</span>
             <span class="patent__tag">Systems</span>
@@ -336,7 +348,7 @@
           <p class="patent__desc">Paste-time program synthesis that transforms copied data into the destination's schema, with live provenance links.</p>
         </article>
 
-        <article class="patent" data-reveal>
+        <article class="patent">
           <div class="patent__top">
             <span class="patent__no">No. 03</span>
             <span class="patent__tag">Distributed systems</span>
@@ -345,7 +357,7 @@
           <p class="patent__desc">Speculatively applies predicted remote edits under a formally bounded-divergence rollback guarantee.</p>
         </article>
 
-        <article class="patent" data-reveal>
+        <article class="patent">
           <div class="patent__top">
             <span class="patent__no">No. 04</span>
             <span class="patent__tag">Privacy / ML</span>
@@ -354,7 +366,7 @@
           <p class="patent__desc">Privately replays a user's real workflows to certify an update before install, with no data leaving the device.</p>
         </article>
 
-        <article class="patent" data-reveal>
+        <article class="patent">
           <div class="patent__top">
             <span class="patent__no">No. 05</span>
             <span class="patent__tag">ML infrastructure</span>
@@ -363,7 +375,7 @@
           <p class="patent__desc">Allocates one end-to-end error budget across precision, compression, and sampling with a certified accuracy bound.</p>
         </article>
 
-        <article class="patent" data-reveal>
+        <article class="patent">
           <div class="patent__top">
             <span class="patent__no">No. 06</span>
             <span class="patent__tag">Security</span>
@@ -372,7 +384,7 @@
           <p class="patent__desc">Acoustic-handshake protocol resistant to GPS and Bluetooth spoofing for proximity-based identity verification.</p>
         </article>
 
-        <article class="patent patent--wide" data-reveal>
+        <article class="patent patent--wide">
           <div class="patent__top">
             <span class="patent__no">No. 07</span>
             <span class="patent__tag">Embedded hardware</span>
@@ -436,7 +448,7 @@
     <!-- ============ CAPABILITIES (editorial interactive list) ============ -->
     <section class="caps shell" id="capabilities" aria-labelledby="caps-title">
       <header class="sec-head">
-        <h2 class="sec-title display" id="caps-title" data-reveal>What I do.</h2>
+        <h2 class="sec-title display reveal-wipe" id="caps-title" data-reveal><span class="wipe-line">What I do.</span></h2>
       </header>
       <ul class="caps__list">
         <li class="cap" data-reveal data-tilt>
