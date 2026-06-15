@@ -189,7 +189,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   letter-spacing: -0.01em;
   white-space: nowrap;
   transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease),
-              border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+              border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease),
+              box-shadow var(--t-med) var(--ease);
 }
 .btn:active { transform: scale(.97); }
 
@@ -198,7 +199,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   color: var(--on-accent);
   box-shadow: 0 10px 30px -10px var(--accent-glow), var(--inset-hi);
 }
-.btn--primary:hover { background: var(--accent-soft); }
+.btn--primary:hover { background: var(--accent-soft); box-shadow: 0 14px 44px -10px var(--accent-glow), 0 0 0 1px rgba(201, 168, 118, .35), var(--inset-hi); }
 
 .btn--ghost {
   padding-inline: 1.4rem;
@@ -415,16 +416,7 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
-/* ---------- Hero (text-only; sequence is the visual below it) ---------- */
-.hero {
-  position: relative;
-  min-height: 88dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: clamp(8rem, 16vh, 11rem) var(--gutter) clamp(3rem, 7vh, 6rem);
-}
+/* ---------- Hero content (now lives inside .seq__hero, the opening overlay) ---------- */
 .hero__inner {
   display: flex;
   flex-direction: column;
@@ -438,8 +430,9 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
 .hero__lede { font-size: clamp(1.05rem, 1.5vw, 1.25rem); color: var(--text-2); max-width: 60ch; margin-inline: auto; }
 .hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .9rem; margin-top: 2.4rem; }
 
-/* ---------- Scroll-scrubbed sequence ---------- */
-.seq { position: relative; height: 360vh; background: var(--bg); }
+/* ---------- Scroll-scrubbed sequence (opening: hero fused into the reel) ---------- */
+/* taller than one screen so the hero handoff (first ~20%) + the scrub share scroll room */
+.seq { position: relative; height: 440vh; background: var(--bg); }
 .seq__pin {
   position: sticky;
   top: 0;
@@ -466,11 +459,44 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  /* blend the clip into the page top/bottom + keep chapter type legible */
+  /* dissolve the clip OUT OF the hero's black: long, deep top fade so the
+     showreel emerges from darkness instead of meeting the hero as a white wall.
+     bottom fade + vignette unchanged in spirit, just slightly deeper. */
   background:
-    linear-gradient(180deg, var(--bg) 0%, transparent 16%, transparent 74%, var(--bg) 100%),
-    radial-gradient(125% 80% at 50% 50%, transparent 38%, rgba(7, 7, 9, .58) 100%);
+    linear-gradient(180deg, var(--bg) 0%, var(--bg) 7%, transparent 36%, transparent 72%, var(--bg) 100%),
+    radial-gradient(130% 92% at 50% 42%, transparent 30%, rgba(7, 7, 9, .62) 100%);
 }
+/* opening curtain: near-opaque Vault + soft gold vignette so the headline reads on
+   near-black at rest; JS lifts opacity 1 -> 0 by p~=0.20 so the reel brightens in.
+   default .97 = the rest state, so the open looks right before/without JS. */
+.seq__open {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: .97;
+  background:
+    radial-gradient(120% 88% at 50% 38%, rgba(201, 168, 118, .07), transparent 56%),
+    var(--bg);
+}
+/* headline overlay: rests centered on the curtain, then JS lifts + fades + scales it
+   out (transform/opacity/filter only) as the reel scrubs in. */
+.seq__hero {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: clamp(7rem, 13vh, 10rem) var(--gutter) clamp(5rem, 12vh, 8rem);
+  opacity: 1;                 /* JS drives opacity + transform inline during the handoff */
+  pointer-events: none;       /* dead areas never block; interactive children opt back in */
+  will-change: transform, opacity;
+}
+.seq__hero a,
+.seq__hero .btn { pointer-events: auto; }
+.seq__hero.is-gone a,
+.seq__hero.is-gone .btn { pointer-events: none; }   /* past the fade: not clickable */
 .seq__chapters {
   position: absolute;
   inset: 0;
@@ -515,34 +541,87 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   transform: scaleX(0);       /* JS drives scaleX with scroll progress (transform-only) */
   transform-origin: left;
 }
+/* quiet corner readout (was a full-screen %): unobtrusive while frames decode, fades on ready */
 .seq__loader {
   position: absolute;
-  inset: 0;
-  z-index: 4;
-  display: grid;
-  place-items: center;
+  inset: auto var(--gutter) clamp(1.3rem, 4vh, 2.2rem) auto;
+  z-index: 7;
+  display: flex;
+  align-items: baseline;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(2rem, 5vw, 3rem);
-  letter-spacing: -0.02em;
-  color: var(--text);
+  font-size: .92rem;
+  letter-spacing: 0;
+  color: var(--text-3);
   pointer-events: none;
   transition: opacity var(--t-med) var(--ease);
 }
-.seq__loader-pct { font-size: .5em; color: var(--accent); margin-left: .08em; }
+.seq__loader-pct { font-size: .82em; color: var(--accent); margin-left: .1em; }
 .seq.is-ready .seq__loader { opacity: 0; }
 
-/* static fallback (reduced-motion / coarse / small / no-canvas): poster + stacked chapters */
+/* restrained scroll cue at rest; JS fades opacity on first scroll (transform = gentle bob only) */
+.seq__cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(4.2rem, 9vh, 6rem);
+  z-index: 7;
+  color: var(--accent);
+  opacity: 1;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: seq-cue-bob 2.4s var(--ease) infinite;
+}
+.seq__cue svg { display: block; width: 26px; height: 26px; opacity: .85; }
+@keyframes seq-cue-bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, 5px); }
+}
+
+/* static fallback (reduced-motion / coarse / small / no-canvas):
+   a normal centered hero, then the calm poster, then the stacked chapters. No pin,
+   no curtain, no scrub. Name + claim are always visible without JS. */
 .seq.is-static { height: auto; }
-.seq.is-static .seq__pin { position: relative; height: auto; min-height: 84dvh; padding-block: var(--section); }
+.seq.is-static .seq__pin {
+  position: relative;
+  display: block;            /* vertical flow: hero -> poster -> chapters */
+  height: auto;
+  min-height: 0;
+  padding-block: var(--section);
+}
 .seq.is-static .seq__canvas,
+.seq.is-static .seq__veil,
+.seq.is-static .seq__open,
 .seq.is-static .seq__loader,
-.seq.is-static .seq__rail { display: none; }
+.seq.is-static .seq__rail,
+.seq.is-static .seq__cue { display: none; }
+.seq.is-static .seq__hero {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto;
+  padding: 0 var(--gutter);
+  margin-bottom: clamp(3rem, 7vh, 5rem);
+}
+.seq.is-static .seq__poster {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: min(var(--shell, 1200px), 100%);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin-inline: auto;
+  border-radius: var(--r-card);
+  -webkit-mask-image: none;
+          mask-image: none;
+}
 .seq.is-static .seq__chapters {
   position: relative;
   inset: auto;
   grid-auto-flow: row;
   gap: clamp(1.4rem, 4vw, 2.4rem);
+  margin-top: clamp(2.4rem, 6vh, 4rem);
 }
 .seq.is-static .seq__chapter {
   grid-area: auto;
@@ -606,7 +685,9 @@ section[id], #top { scroll-margin-top: 100px; }
   border: 1px solid var(--hairline);
   box-shadow: var(--inset-hi);
   overflow: hidden;
-  transition: transform var(--t-med) var(--ease), border-color var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+  /* NB: transform is scroll-driven by frame() (reveal) on .card and hover-tilt on .card__inner,
+     so it is intentionally NOT transitioned here (would lag the scrubbed reveal). */
+  transition: border-color var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
 }
 .card:hover {
   border-color: var(--hairline-strong);
@@ -647,11 +728,19 @@ section[id], #top { scroll-margin-top: 100px; }
 }
 .card:hover .card__media[class*="--g"] { transform: scale(1.015); }
 .card__media[class*="--g"] { transition: transform var(--t-slow) var(--ease); }
-.card__media--g1 { background: radial-gradient(120% 110% at 22% 0%, rgba(201, 168, 118,.26), transparent 55%), linear-gradient(155deg, #12121a, #0a0a0d); }
-.card__media--g2 { background: radial-gradient(120% 120% at 85% 10%, rgba(201, 168, 118,.18), transparent 58%), linear-gradient(155deg, #101016, #0b0b0f); }
-.card__media--g3 { background: radial-gradient(130% 120% at 50% 120%, rgba(201, 168, 118,.30), transparent 60%), linear-gradient(155deg, #0e1417, #0a0c0d); }
-.card__media--g4 { background: radial-gradient(120% 120% at 12% 100%, rgba(196,154,69,.22), transparent 60%), linear-gradient(155deg, #131319, #0a0a0e); }
-.card__media--g5 { background: radial-gradient(130% 120% at 90% 90%, rgba(201, 168, 118,.20), transparent 58%), linear-gradient(155deg, #101218, #0a0a0d); }
+/* per-card glow lives on --media-grad; it rides the parallax ::before over the dark base */
+.card__media--g1 { --media-grad: radial-gradient(120% 110% at 22% 0%, rgba(201, 168, 118, .26), transparent 55%); }
+.card__media--g2 { --media-grad: radial-gradient(120% 120% at 85% 10%, rgba(201, 168, 118, .18), transparent 58%); }
+.card__media--g3 { --media-grad: radial-gradient(130% 120% at 50% 120%, rgba(201, 168, 118, .30), transparent 60%); }
+.card__media--g4 { --media-grad: radial-gradient(120% 120% at 12% 100%, rgba(196, 154, 69, .22), transparent 60%); }
+.card__media--g5 { --media-grad: radial-gradient(130% 120% at 90% 90%, rgba(201, 168, 118, .20), transparent 58%); }
+.card__media[class*="--g"]::before {
+  content: "";
+  position: absolute;
+  inset: -18px;                 /* oversized so the parallax never reveals an edge */
+  background: var(--media-grad, transparent);
+  transform: translate3d(0, var(--mpy, 0px), 0);
+}
 
 /* honest status pill (sits at the bottom of the card) */
 .card__status {
@@ -697,9 +786,10 @@ section[id], #top { scroll-margin-top: 100px; }
   background: var(--surface);
   border: 1px solid var(--hairline);
   box-shadow: var(--inset-hi);
-  transition: border-color var(--t-med) var(--ease), background var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+  /* transform is scroll-driven by frame() (reveal), so not transitioned; hover "lift" is shadow-based */
+  transition: border-color var(--t-med) var(--ease), background var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
 }
-.patent:hover { border-color: var(--hairline-strong); background: var(--surface-2); transform: translateY(-2px); }
+.patent:hover { border-color: var(--hairline-strong); background: var(--surface-2); }
 .patent--wide { grid-column: 1 / -1; }
 .patent__top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .patent__no {
@@ -852,6 +942,96 @@ section[id], #top { scroll-margin-top: 100px; }
 [data-reveal].is-in { opacity: 1; transform: none; filter: none; }
 
 /* ============================================================
+   Scroll choreography + micro-interactions (motion pass)
+   `.choreo` is added to <html> by JS only when motion is allowed.
+   Work cards + patents are then driven by the shared frame() rAF
+   (inline transform/opacity). Reduced-motion / no-JS keeps the
+   static look (no `.choreo`, headings reset below).
+   ============================================================ */
+
+/* hidden start-state for scroll-choreographed items (revealed by frame() progress) */
+.choreo #work .bento > .card,
+.choreo #patents .patent { opacity: 0; }
+
+/* cursor-follow specular highlight on Work cards (fine pointer; JS sets --mx/--my) */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--t-med) var(--ease);
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), rgba(245, 245, 242, .10), transparent 60%);
+}
+.card:hover::before { opacity: 1; }
+.card:hover .chip { transform: translateY(-1px); }
+.chip { transition: transform var(--t-fast) var(--ease); }
+
+/* Patents: No. underline draws in on reveal; card lifts + gold edge on hover */
+.patent__no { position: relative; }
+.patent__no::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -3px;
+  width: 100%; height: 1.5px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-slow) var(--ease);
+}
+.patent.is-shown .patent__no::after { transform: scaleX(1); }
+.patent:hover { box-shadow: 0 0 0 1px var(--accent-glow), 0 18px 40px -28px rgba(0,0,0,.8), var(--inset-hi); }
+
+/* one-time gold "scan" hairline sweeping the patents grid as it enters */
+.patents__grid { position: relative; }
+.patents__scan {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--accent) 18%, var(--accent-soft) 50%, var(--accent) 82%, transparent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+.patents__grid.is-scanned .patents__scan { animation: patents-scan 1.5s var(--ease) forwards; }
+@keyframes patents-scan {
+  0%   { opacity: 0; transform: translateY(0); }
+  12%  { opacity: .9; }
+  88%  { opacity: .9; }
+  100% { opacity: 0; transform: translateY(var(--scan-end, 600px)); }
+}
+
+/* Section headings: masked line-wipe (type "arrives" from behind an overflow mask).
+   The outer h2 keeps a full-size box (so IntersectionObserver fires reliably); the
+   inner .wipe-line carries the transform. clip-path is avoided on purpose: clipping
+   the element to zero area makes IO report 0 intersection and never add .is-in. */
+[data-reveal].reveal-wipe { opacity: 1; transform: none; filter: none; overflow: hidden; }
+.reveal-wipe .wipe-line {
+  display: block;
+  padding-bottom: .14em;            /* room for descenders inside the overflow mask */
+  transform: translateY(120%);
+  transition: transform var(--t-slow) var(--ease) var(--d, 0s);
+}
+.reveal-wipe.is-in .wipe-line { transform: translateY(0); }
+
+/* micro-interactions: underline grows from the left on nav + footer links */
+.nav__links a, .footer__nav a { position: relative; }
+.nav__links a::after, .footer__nav a::after {
+  content: "";
+  position: absolute;
+  left: .85rem; right: .85rem; bottom: .3rem;
+  height: 1.5px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-fast) var(--ease);
+}
+.footer__nav a::after { left: 0; right: 0; bottom: -2px; }
+.nav__links a:hover::after, .footer__nav a:hover::after { transform: scaleX(1); }
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 980px) {
@@ -891,13 +1071,20 @@ section[id], #top { scroll-margin-top: 100px; }
     transition-duration: .001ms !important;
   }
   [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .reveal-wipe .wipe-line { transform: none !important; }
   .marquee__track { animation: none; }
   .orb { display: none; }
-  /* sequence collapses to a static poster + stacked chapters (also enforced if JS is absent) */
+  /* motion-pass effects collapse: no specular, no media parallax, no scan */
+  .card::before { display: none; }
+  .card__media[class*="--g"]::before { transform: none !important; }
+  .patents__grid .patents__scan { animation: none !important; opacity: 0 !important; }
+  /* opening collapses to a static hero -> poster -> stacked chapters (enforced even if JS is absent) */
   .seq { height: auto; }
-  .seq__pin { position: relative; height: auto; min-height: 84dvh; padding-block: var(--section); }
-  .seq__canvas, .seq__loader, .seq__rail { display: none; }
-  .seq__chapters { position: relative; inset: auto; grid-auto-flow: row; gap: clamp(1.4rem, 4vw, 2.4rem); }
+  .seq__pin { position: relative; display: block; height: auto; min-height: 0; padding-block: var(--section); }
+  .seq__canvas, .seq__veil, .seq__open, .seq__loader, .seq__rail, .seq__cue { display: none; }
+  .seq__hero { position: relative; inset: auto; z-index: auto; opacity: 1 !important; transform: none !important; pointer-events: auto; padding: 0 var(--gutter); margin-bottom: clamp(3rem, 7vh, 5rem); }
+  .seq__poster { position: relative; inset: auto; z-index: auto; width: min(var(--shell), 100%); height: auto; aspect-ratio: 16 / 9; margin-inline: auto; border-radius: var(--r-card); -webkit-mask-image: none; mask-image: none; }
+  .seq__chapters { position: relative; inset: auto; grid-auto-flow: row; gap: clamp(1.4rem, 4vw, 2.4rem); margin-top: clamp(2.4rem, 6vh, 4rem); }
   .seq__chapter { grid-area: auto; opacity: 1; transform: none; }
 }
 

@@ -146,6 +146,12 @@
 
     const loaderNum = document.getElementById("seq-loader-num");
     const railFill = document.getElementById("seq-rail");
+    const heroEl = document.getElementById("seq-hero");   // headline overlay (parallaxes out)
+    const openEl = document.getElementById("seq-open");   // opening curtain (reel lights up)
+    const cueEl = document.getElementById("seq-cue");      // scroll cue (fades on first scroll)
+    let heroGone = false;                                  // pointer-events handoff past the fade
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);         // smooth, no overshoot
+    const vh = () => window.innerHeight || 1;
     const chapters = Array.from(section.querySelectorAll(".seq__chapter")).map((el) => ({
       el, at: parseFloat(el.dataset.at), active: false,
     }));
@@ -217,10 +223,35 @@
     window.addEventListener("resize", () => { if (ready) sizeCanvas(); }, { passive: true });
 
     seqTick = function () {
-      if (!ready || !inView) return;
+      if (!inView) return;
       const r = section.getBoundingClientRect();
       const dist = r.height - window.innerHeight;
       const p = dist > 0 ? Math.min(1, Math.max(0, -r.top / dist)) : 0;
+
+      /* ---- opening handoff: runs regardless of frame-decode `ready` so the headline
+              lifts and the curtain lights up even while frames are still warming ---- */
+      // hero parallaxes out over the first ~18%: up ~10vh, fades, scales 1 -> .965
+      const out = easeOut(Math.min(1, p / 0.18));
+      if (heroEl) {
+        heroEl.style.opacity = (1 - out).toFixed(3);
+        heroEl.style.transform =
+          `translate3d(0, ${(-out * vh() * 0.10).toFixed(1)}px, 0) scale(${(1 - out * 0.035).toFixed(4)})`;
+        const gone = p > 0.16; // stop intercepting clicks once the headline is essentially gone
+        if (gone !== heroGone) { heroGone = gone; heroEl.classList.toggle("is-gone", gone); }
+      }
+      // curtain lifts: full Vault at p=0 -> clear by p~=0.20 (reel brightens in)
+      if (openEl) openEl.style.opacity = ((1 - easeOut(Math.min(1, p / 0.20))) * 0.97).toFixed(3);
+      // scroll cue fades out after the first nudge
+      if (cueEl) cueEl.style.opacity = Math.max(0, 1 - p / 0.045).toFixed(3);
+      // progress rail + chapter cross-fades (transform/opacity only)
+      if (railFill) railFill.style.transform = `scaleX(${p.toFixed(4)})`;
+      for (const c of chapters) {
+        const on = Math.abs(p - c.at) < 0.14; // tighter window so the headline owns the opening
+        if (on !== c.active) { c.active = on; c.el.classList.toggle("is-active", on); }
+      }
+
+      /* ---- canvas scrub: the only part gated on frames being decodable ---- */
+      if (!ready) return;
       const target = p * (FRAMES - 1);
       if (!primed) { cur = target; primed = true; }
       // lerp toward target -> weighted, silky scrubbing; snappy enough to not feel laggy
@@ -232,13 +263,88 @@
         const use = nearestLoaded(idx);
         if (use >= 0) draw(use);
       }
-      if (railFill) railFill.style.transform = `scaleX(${p.toFixed(4)})`;
-      for (const c of chapters) {
-        const on = Math.abs(p - c.at) < 0.16;
-        if (on !== c.active) { c.active = on; c.el.classList.toggle("is-active", on); }
-      }
     };
   })();
+
+  /* ---------- Scroll choreography: Work + Patents (hooks the shared frame(); transform/opacity only) ---------- */
+  let choreoTick = null;
+  if (!reduceMotion) {
+    document.documentElement.classList.add("choreo"); // arms hidden start-states in CSS
+    const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+    const groups = [];
+
+    const addGroup = (itemsSel, sectionSel, o) => {
+      const section = document.querySelector(sectionSel);
+      const items = Array.from(document.querySelectorAll(itemsSel));
+      if (!section || !items.length) return;
+      const g = { section, items, inView: false, ...o };
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(
+          (es) => es.forEach((e) => { g.inView = e.isIntersecting; }),
+          { rootMargin: "0px 0px -5% 0px" }
+        ).observe(section);
+      } else { g.inView = true; }
+      groups.push(g);
+    };
+    // feature card is first in DOM -> leads the cascade
+    addGroup("#work .bento > .card", "#work .bento", { stagger: 0.09, win: 0.55, rise: 44, parallax: true });
+    addGroup("#patents .patent", "#patents .patents__grid", { stagger: 0.07, win: 0.5, rise: 38, underline: true });
+
+    choreoTick = function () {
+      const H = window.innerHeight || 1;
+      for (const g of groups) {
+        if (!g.inView) continue;
+        const r = g.section.getBoundingClientRect();
+        // section progress: begins as its top passes ~92% vh, completes near ~40% vh
+        const sp = clamp01((H * 0.92 - r.top) / (H * 0.52));
+        if (sp === g._lastSp) continue; // idle: nothing to repaint
+        g._lastSp = sp;
+        for (let i = 0; i < g.items.length; i++) {
+          const el = g.items[i];
+          const cp = clamp01((sp - i * g.stagger) / g.win);
+          const e = easeOut(cp);
+          el.style.opacity = e.toFixed(3);
+          el.style.transform = `translate3d(0, ${((1 - e) * g.rise).toFixed(1)}px, 0) scale(${(0.965 + e * 0.035).toFixed(4)})`;
+          if (g.parallax) {
+            const cr = el.getBoundingClientRect();
+            const rel = (cr.top + cr.height / 2 - H / 2) / H; // -0.5 .. 0.5
+            el.style.setProperty("--mpy", (-rel * 16).toFixed(1) + "px"); // <= +-8px drift
+          }
+          if (g.underline) {
+            const shown = cp > 0.5;
+            if (shown !== el._shown) { el._shown = shown; el.classList.toggle("is-shown", shown); }
+          }
+        }
+      }
+    };
+
+    // one-time gold "scan" hairline as the patents grid enters
+    const pgrid = document.querySelector("#patents .patents__grid");
+    if (pgrid && "IntersectionObserver" in window) {
+      const sio = new IntersectionObserver((es) => {
+        es.forEach((e) => {
+          if (e.isIntersecting && !pgrid.classList.contains("is-scanned")) {
+            pgrid.style.setProperty("--scan-end", pgrid.offsetHeight + "px");
+            pgrid.classList.add("is-scanned");
+            sio.disconnect();
+          }
+        });
+      }, { threshold: 0.25 });
+      sio.observe(pgrid);
+    }
+
+    // cursor-follow specular highlight on Work cards (fine pointer only)
+    if (finePointer) {
+      document.querySelectorAll("#work .bento > .card").forEach((card) => {
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+          card.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+        });
+      });
+    }
+  }
 
   /* ---------- Single rAF loop: nav state + ambient parallax + sequence ---------- */
   const navShell = document.querySelector(".nav-shell");
@@ -260,6 +366,7 @@
       }
       lastY = y;
     }
+    if (choreoTick) choreoTick();
     if (seqTick) seqTick();
     requestAnimationFrame(frame);
   }
