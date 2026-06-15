@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="RoSh">
+  <g fill="none" stroke="#C9A876">
+    <circle cx="32" cy="32" r="28.5" stroke-width="1.9"/>
+    <circle cx="32" cy="32" r="20.5" stroke-width="1.45"/>
+  </g>
+  <path d="M32 21 L43.7 39.6 L20.3 39.6 Z" fill="#C9A876"/>
+  <circle cx="32" cy="44.3" r="2.5" fill="#C9A876"/>
+</svg>

@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Source-only media (NOT part of the deployed site).
+# Runtime assets live under assets/ (avatar, hero video, frame sequence).
+# These root files are the originals / extraction inputs and should not ship.
+/RoShGenMoji.png
+/finalvideo.mov
+/finalvideo.mp4
+/Firefly*.mov
