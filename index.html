@@ -101,24 +101,26 @@
   <!-- ============ NAV ============ -->
   <header class="nav-shell">
     <nav class="nav" aria-label="Primary">
-      <a class="nav__brand" href="#top" data-magnetic aria-label="RoSh, home">
+      <a class="nav__brand" href="index.html" data-magnetic aria-label="RoSh, home">
         <span class="nav__mark" aria-hidden="true">R</span>
         <span class="nav__name">RoSh</span>
       </a>
 
       <ul class="nav__links" id="nav-links">
-        <li><a href="#work">Work</a></li>
-        <li><a href="#patents">Patents</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#capabilities">Capabilities</a></li>
+        <li><a href="projects.html">Work</a></li>
+        <li><a href="patents.html">Patents</a></li>
+        <li><a href="writing.html">Writing</a></li>
+        <li><a href="about.html">About</a></li>
       </ul>
 
-      <a class="btn btn--primary nav__cta" href="#contact" data-magnetic>
-        <span>Let's talk</span>
-        <span class="btn__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
-        </span>
-      </a>
+      <div class="nav__actions">
+        <a class="btn btn--primary nav__cta" href="contact.html" data-magnetic>
+          <span>Let's talk</span>
+          <span class="btn__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </span>
+        </a>
+      </div>
 
       <button class="nav__burger" id="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-overlay">
         <span></span><span></span>
@@ -129,11 +131,12 @@
   <!-- Mobile full-screen menu -->
   <div class="nav-overlay" id="nav-overlay" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" tabindex="-1">
     <ul class="nav-overlay__links">
-      <li style="--i:0"><a href="#work" data-overlay-link>Work</a></li>
-      <li style="--i:1"><a href="#patents" data-overlay-link>Patents</a></li>
-      <li style="--i:2"><a href="#about" data-overlay-link>About</a></li>
-      <li style="--i:3"><a href="#capabilities" data-overlay-link>Capabilities</a></li>
-      <li style="--i:4"><a href="#contact" data-overlay-link>Let's talk</a></li>
+      <li style="--i:0"><a href="projects.html" data-overlay-link>Work</a></li>
+      <li style="--i:1"><a href="patents.html" data-overlay-link>Patents</a></li>
+      <li style="--i:2"><a href="writing.html" data-overlay-link>Writing</a></li>
+      <li style="--i:3"><a href="about.html" data-overlay-link>About</a></li>
+      <li style="--i:4"><a href="now.html" data-overlay-link>Now</a></li>
+      <li style="--i:5"><a href="contact.html" data-overlay-link>Let's talk</a></li>
     </ul>
     <div class="nav-overlay__foot">
       <a href="mailto:roshan@roshworldwide.com">roshan@roshworldwide.com</a>
@@ -153,12 +156,12 @@
           <div class="hero__inner">
             <p class="eyebrow reveal" data-reveal>Systems &amp; ML Engineer · Inventor</p>
             <h1 class="hero__title display" id="hero-title">
-              <span class="reveal" data-reveal>Systems that work</span>
-              <span class="reveal accent-em" data-reveal style="--d:.06s">where the internet can't reach.</span>
+              <span class="reveal reveal-wipe" data-reveal><span class="wipe-line">Systems that work</span></span>
+              <span class="reveal reveal-wipe accent-em" data-reveal style="--d:.10s"><span class="wipe-line">where the internet can't reach.</span></span>
             </h1>
             <p class="hero__lede reveal" data-reveal style="--d:.12s">
-              I'm Roshan. I build air-gapped AI, quant ML, and on-device systems, and take them from
-              prototype to production. Inventor on 7 patent applications.
+              I'm Roshan. I build for the places the network gave up on — air-gapped AI, on-device
+              inference, and the last mile most teams route around. Inventor on 7 patents, filed and waiting.
             </p>
             <div class="hero__actions reveal" data-reveal style="--d:.18s">
               <a class="btn btn--primary" href="#contact" data-magnetic>
@@ -177,15 +180,19 @@
         <img class="seq__poster" src="assets/sequence/poster.webp" alt="" aria-hidden="true" width="1280" height="720" decoding="async" />
         <canvas class="seq__canvas" id="seq-canvas" aria-hidden="true"></canvas>
         <div class="seq__veil" aria-hidden="true"></div>
-        <!-- opening curtain: near-opaque Vault at rest so the headline reads on near-black; -->
-        <!-- JS lifts its opacity to 0 by p~=0.20 so the reel brightens as you descend -->
+        <!-- color grade (z3): static cinematic finish over the reel - shadow-lift + gold key-kiss + filmic
+             vignette. Sits above the image plane, below chapters/bloom/curtain/headline. No motion. -->
+        <div class="seq__grade" aria-hidden="true"></div>
+        <!-- key-light bloom (z4): blooms up from behind the figure as the curtain lifts (JS drives --bloom + opacity) -->
+        <div class="seq__bloom" id="seq-bloom" aria-hidden="true"></div>
+        <!-- opening curtain (z5): living-black sheen at rest, lifts as the reel scrubs in, dims back on exit -->
         <div class="seq__open" id="seq-open" aria-hidden="true"></div>
 
         <!-- chapters: cross-fade later in the scroll; headline owns the opening -->
         <div class="seq__chapters">
-          <div class="seq__chapter" data-at="0.40"><h2 class="display">From prototype</h2><p>where the idea begins.</p></div>
-          <div class="seq__chapter" data-at="0.66"><h2 class="display">To production</h2><p>fast, reliable, real.</p></div>
-          <div class="seq__chapter" data-at="0.90"><h2 class="display">At scale</h2><p>built to last.</p></div>
+          <div class="seq__chapter" data-at="0.40"><h2 class="display">From prototype</h2><p>where nothing works yet.</p></div>
+          <div class="seq__chapter" data-at="0.66"><h2 class="display">To production</h2><p>where it has to hold.</p></div>
+          <div class="seq__chapter" data-at="0.90"><h2 class="display">At scale</h2><p>it doesn't blink.</p></div>
         </div>
 
         <div class="seq__rail" aria-hidden="true"><span class="seq__rail-fill" id="seq-rail"></span></div>
@@ -198,6 +205,9 @@
         <div class="seq__cue" id="seq-cue" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
+
+        <!-- cinematic letterbox (z8, topmost in pin): two Vault bars (::before/::after) drive in/out from one --bar var -->
+        <div class="seq__bars" aria-hidden="true"></div>
       </div>
     </section>
 
@@ -222,102 +232,122 @@
       </div>
     </section>
 
-    <!-- ============ SELECTED WORK (asymmetric bento) ============ -->
+    <!-- ============ SELECTED WORK (pinned horizontal cinematic gallery) ============ -->
     <section class="work shell" id="work" aria-labelledby="work-title">
-      <header class="sec-head">
-        <p class="eyebrow" data-reveal>
-          Selected work
-        </p>
-        <h2 class="sec-title display reveal-wipe" id="work-title" data-reveal>
-          <span class="wipe-line">Systems I have built.</span>
-        </h2>
-      </header>
+      <!-- Real projects. Honest status pills; no links until a repo is public.
+           Pinned path: vertical scroll drives the horizontal filmstrip (workTick in the shared frame()).
+           Touch/coarse/<=760: native horizontal scroll-snap. Reduced-motion: calm wrapped grid. -->
+      <div class="work__pin">
+        <!-- persistent stage label + 01/05 counter: lives INSIDE the sticky pin so it stays in the
+             pinned viewport (pin corner on the pinned path; normal heading block above the strip on
+             native/reduced paths). Holds the single <h2> so aria-labelledby stays valid. -->
+        <div class="work__label">
+          <p class="eyebrow" data-reveal>Selected work</p>
+          <h2 class="sec-title display reveal-wipe" id="work-title" data-reveal>
+            <span class="wipe-line">Systems I have built.</span>
+          </h2>
+          <p class="work__counter" aria-hidden="true"><span id="work-index">01</span> / 05</p>
+        </div>
 
-      <!-- Real projects. Honest status pills; no links until a repo is public. -->
-      <div class="bento">
-        <article class="card card--feature">
-          <div class="card__inner" data-tilt>
-            <div class="card__media card__media--g1" aria-hidden="true"></div>
-            <div class="card__body">
-              <div class="card__meta">
-                <span class="chip">Inference / ML infra</span>
-                <span class="card__year">2026</span>
+        <div class="work__track">
+          <div class="work__panel">
+            <article class="card card--feature">
+              <div class="card__inner" data-tilt>
+                <div class="card__media card__media--g1" aria-hidden="true"></div>
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="chip">Inference / ML infra</span>
+                    <span class="card__year">2026</span>
+                  </div>
+                  <h3 class="card__title" id="wt-1">LLM Evaluation Framework</h3>
+                  <p class="card__desc">Statistical evidence that one model genuinely beats another, with quant-grade rigor: bootstrap confidence intervals, paired significance tests, leakage and overfitting detection, and CI gating. Runs offline, against local models.</p>
+                  <span class="card__status card__status--dev">In development</span>
+                </div>
               </div>
-              <h3 class="card__title">LLM Evaluation Framework</h3>
-              <p class="card__desc">Quant-grade statistical evaluation and regression testing for LLMs: bootstrap confidence intervals, paired significance tests, leakage and overfitting detection, and CI gating. Runs offline against local models.</p>
-              <span class="card__status card__status--dev">In development</span>
-            </div>
+            </article>
           </div>
-        </article>
 
-        <article class="card">
-          <div class="card__inner" data-tilt>
-            <div class="card__media card__media--g2" aria-hidden="true"></div>
-            <div class="card__body">
-              <div class="card__meta">
-                <span class="chip">Air-gapped systems</span>
-                <span class="card__year">2026</span>
+          <div class="work__panel">
+            <article class="card">
+              <div class="card__inner" data-tilt>
+                <div class="card__media card__media--g2" aria-hidden="true"></div>
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="chip">Air-gapped systems</span>
+                    <span class="card__year">2026</span>
+                  </div>
+                  <h3 class="card__title" id="wt-2">On-Premise SRE Engine</h3>
+                  <p class="card__desc">A 14B-parameter model, 4-bit on Apple MLX, that diagnoses and repairs enterprise servers on its own, with zero bytes leaving the machine. Sub-800ms from fault to fix.</p>
+                  <span class="card__status card__status--research">Research</span>
+                </div>
               </div>
-              <h3 class="card__title">On-Premise SRE Engine</h3>
-              <p class="card__desc">A 14B-parameter model, 4-bit on Apple MLX, that diagnoses and auto-remediates enterprise servers with zero bytes leaving the machine. Sub-800ms remediation.</p>
-              <span class="card__status card__status--research">Research</span>
-            </div>
+            </article>
           </div>
-        </article>
 
-        <article class="card">
-          <div class="card__inner" data-tilt>
-            <div class="card__media card__media--g3" aria-hidden="true"></div>
-            <div class="card__body">
-              <div class="card__meta">
-                <span class="chip">Authentication</span>
-                <span class="card__year">2026</span>
+          <div class="work__panel">
+            <article class="card">
+              <div class="card__inner" data-tilt>
+                <div class="card__media card__media--g3" aria-hidden="true"></div>
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="chip">Authentication</span>
+                    <span class="card__year">2026</span>
+                  </div>
+                  <h3 class="card__title" id="wt-3">Acoustic AMS</h3>
+                  <p class="card__desc">Attendance authentication by acoustic handshake, deaf to the GPS and Bluetooth spoofing that fools everything else. Deployed campus-wide at Manipal Institute of Technology Bengaluru at 99.9% uptime, sub-50ms verification, and the basis of a patent filing.</p>
+                  <span class="card__status card__status--live">Deployed</span>
+                </div>
               </div>
-              <h3 class="card__title">Acoustic AMS</h3>
-              <p class="card__desc">Acoustic-handshake attendance auth resistant to GPS and Bluetooth spoofing. Deployed campus-wide at Manipal Institute of Technology Bengaluru at 99.9% uptime, sub-50ms verification. Basis of a patent filing.</p>
-              <span class="card__status card__status--live">Deployed</span>
-            </div>
+            </article>
           </div>
-        </article>
 
-        <article class="card">
-          <div class="card__inner" data-tilt>
-            <div class="card__media card__media--g4" aria-hidden="true"></div>
-            <div class="card__body">
-              <div class="card__meta">
-                <span class="chip">macOS / Metal</span>
-                <span class="card__year">2026</span>
+          <div class="work__panel">
+            <article class="card">
+              <div class="card__inner" data-tilt>
+                <div class="card__media card__media--g4" aria-hidden="true"></div>
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="chip">macOS / Metal</span>
+                    <span class="card__year">2026</span>
+                  </div>
+                  <h3 class="card__title" id="wt-4">Finance OS</h3>
+                  <p class="card__desc">A native macOS liquidity command center: predictive cash-flow forecasting 90 days out, GPU-rendered and locked at 120fps.</p>
+                  <span class="card__status card__status--research">Research</span>
+                </div>
               </div>
-              <h3 class="card__title">Finance OS</h3>
-              <p class="card__desc">Native macOS liquidity command center: predictive cash-flow forecasting 90 days out, GPU-rendered at a locked 120fps.</p>
-              <span class="card__status card__status--research">Research</span>
-            </div>
+            </article>
           </div>
-        </article>
 
-        <article class="card">
-          <div class="card__inner" data-tilt>
-            <div class="card__media card__media--g5" aria-hidden="true"></div>
-            <div class="card__body">
-              <div class="card__meta">
-                <span class="chip">Quant ML</span>
-                <span class="card__year">2026</span>
+          <div class="work__panel">
+            <article class="card">
+              <div class="card__inner" data-tilt>
+                <div class="card__media card__media--g5" aria-hidden="true"></div>
+                <div class="card__body">
+                  <div class="card__meta">
+                    <span class="chip">Quant ML</span>
+                    <span class="card__year">2026</span>
+                  </div>
+                  <h3 class="card__title" id="wt-5">Quantitative Signal Engine</h3>
+                  <p class="card__desc">A gradient-boosting ensemble over 4,450,146 rows with 160-day walk-forward validation: 54.7% peak win rate at a 0.75 confidence threshold, across 175 Optuna trials.</p>
+                  <span class="card__status card__status--research">Research</span>
+                </div>
               </div>
-              <h3 class="card__title">Quantitative Signal Engine</h3>
-              <p class="card__desc">Gradient-boosting ensemble over 4,450,146 rows with 160-day walk-forward validation. 54.7% peak win rate at a 0.75 confidence threshold, across 175 Optuna trials.</p>
-              <span class="card__status card__status--research">Research</span>
-            </div>
+            </article>
           </div>
-        </article>
+        </div>
+
+        <div class="work__rail" aria-hidden="true"><span class="work__rail-fill" id="work-rail"></span></div>
       </div>
     </section>
+
+    <div class="shell"><a class="view-all" href="projects.html">All projects <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
 
     <!-- ============ PATENTS (the quiet centerpiece) ============ -->
     <section class="patents shell" id="patents" aria-labelledby="patents-title">
       <header class="sec-head patents__head">
         <p class="eyebrow" data-reveal>Inventions</p>
         <h2 class="sec-title display reveal-wipe" id="patents-title" data-reveal><span class="wipe-line">Seven patents, on file.</span></h2>
-        <p class="patents__sub" data-reveal>7 patent applications, submitted for filing.</p>
+        <p class="patents__sub" data-reveal>Seven patent applications, submitted for filing. The ideas were the fast part.</p>
         <ul class="patents__domains" data-reveal aria-label="Domains covered">
           <li>Privacy</li>
           <li>Systems</li>
@@ -395,6 +425,8 @@
       </div>
     </section>
 
+    <div class="shell"><a class="view-all" href="patents.html">All patents <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+
     <!-- ============ ABOUT (portrait + statement + organic stats) ============ -->
     <section class="about shell" id="about" aria-labelledby="about-title">
       <div class="about__grid">
@@ -418,9 +450,8 @@
             cloud to fall back on.
           </h2>
           <p data-reveal>
-            I'm Roshan Raj. I take systems from prototype to production: training and evaluation,
-            low-latency on-device inference, and the infrastructure that has to hold up when the
-            network can't. The last mile is the part I care about most.
+            I'm Roshan Raj, and I build for the last mile — the part that has to keep working after the
+            demo ends and the network drops. Prototype to production, and I don't trust it until it's the latter.
           </p>
           <p data-reveal>
             Inventor on 7 patent applications across privacy, distributed systems, and ML
@@ -429,21 +460,23 @@
           <dl class="stats" data-reveal>
             <div class="stat">
               <dt>Patents filed</dt>
-              <dd class="display">7</dd>
+              <dd class="display"><span class="stat__num" aria-hidden="true" data-to="7" data-decimals="0">7</span><span class="visually-hidden">7</span></dd>
             </div>
             <div class="stat">
               <dt>Uptime, campus deployment</dt>
-              <dd class="display">99.9<span class="stat__unit">%</span></dd>
+              <dd class="display"><span class="stat__num" aria-hidden="true" data-to="99.9" data-decimals="1">99.9</span><span class="stat__unit" aria-hidden="true">%</span><span class="visually-hidden">99.9%</span></dd>
             </div>
             <div class="stat">
               <dt>Bytes outbound, air-gapped</dt>
-              <dd class="display">0</dd>
+              <dd class="display"><span class="stat__num stat__num--zero" aria-hidden="true" data-to="0" data-decimals="0">0</span><span class="visually-hidden">0</span></dd>
             </div>
           </dl>
           <p class="about__edu" data-reveal>CS · Manipal Institute of Technology, Bengaluru · Class of 2027</p>
         </div>
       </div>
     </section>
+
+    <div class="shell"><a class="view-all" href="about.html">Read more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
 
     <!-- ============ CAPABILITIES (editorial interactive list) ============ -->
     <section class="caps shell" id="capabilities" aria-labelledby="caps-title">
@@ -457,19 +490,19 @@
             <p class="cap__detail">Training, evaluation, and statistical rigor: significance testing, walk-forward validation, and signals that survive out of sample.</p>
           </div>
         </li>
-        <li class="cap" data-reveal data-tilt>
+        <li class="cap" data-reveal data-tilt style="--d:.06s">
           <div class="cap__row">
             <h3 class="cap__name">On-device &amp; air-gapped inference</h3>
             <p class="cap__detail">Local models on Apple MLX, 4-bit quantization, and sub-second response with zero data leaving the machine.</p>
           </div>
         </li>
-        <li class="cap" data-reveal data-tilt>
+        <li class="cap" data-reveal data-tilt style="--d:.12s">
           <div class="cap__row">
             <h3 class="cap__name">Full-stack product</h3>
             <p class="cap__detail">Native macOS and Metal, typed Python services, and interfaces built so the seams never show.</p>
           </div>
         </li>
-        <li class="cap" data-reveal data-tilt>
+        <li class="cap" data-reveal data-tilt style="--d:.18s">
           <div class="cap__row">
             <h3 class="cap__name">Platform &amp; infra</h3>
             <p class="cap__detail">Pipelines, observability, and systems that diagnose and remediate themselves under load.</p>
@@ -478,17 +511,21 @@
       </ul>
     </section>
 
+    <div class="shell"><a class="view-all" href="writing.html">Writing <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+
     <!-- ============ CONTACT (closing manifesto) ============ -->
     <section class="contact" id="contact" aria-labelledby="contact-title">
+      <span class="contact__orb" aria-hidden="true"></span>
       <div class="shell contact__inner">
-        <h2 class="contact__title display" id="contact-title" data-reveal>
-          Have something worth <span class="accent-em">building?</span>
+        <h2 class="contact__title display reveal-wipe" id="contact-title" data-reveal>
+          <span class="wipe-line">Have something worth</span>
+          <span class="wipe-line accent-em" style="--d:.12s">building?</span>
         </h2>
         <p class="contact__lede" data-reveal>
-          Tell me what you are trying to ship, especially if it has to work where the network can't.
-          I reply to every serious message.
+          Tell me what you're building, especially if it has to work where the network can't.
+          I read every serious message, and I answer the interesting ones fast.
         </p>
-        <a class="btn btn--primary btn--lg" href="mailto:roshan@roshworldwide.com" data-magnetic data-reveal>
+        <a class="btn btn--primary btn--lg" href="contact.html" data-magnetic data-reveal>
           <span>Let's talk</span>
           <span class="btn__icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
@@ -501,15 +538,17 @@
   <!-- ============ FOOTER ============ -->
   <footer class="footer shell">
     <div class="footer__top">
-      <a class="footer__brand" href="#top">
+      <a class="footer__brand" href="index.html">
         <span class="nav__mark" aria-hidden="true">R</span>
         RoSh
       </a>
       <nav class="footer__nav" aria-label="Footer">
-        <a href="#work">Work</a>
-        <a href="#patents">Patents</a>
-        <a href="#about">About</a>
-        <a href="#capabilities">Capabilities</a>
+        <a href="projects.html">Work</a>
+        <a href="patents.html">Patents</a>
+        <a href="writing.html">Writing</a>
+        <a href="about.html">About</a>
+        <a href="now.html" class="footer__nav-sec">Now</a>
+        <a href="contact.html">Contact</a>
         <a href="mailto:roshan@roshworldwide.com">Email</a>
       </nav>
       <ul class="footer__social">
