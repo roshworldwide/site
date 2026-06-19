@@ -57,6 +57,60 @@
 
   --shadow-card: 0 28px 80px -32px rgba(0, 0, 0, .8), 0 2px 8px -4px rgba(0, 0, 0, .6);
   --inset-hi: inset 0 1px 0 rgba(255, 255, 255, .08);
+
+  /* ============ TAHOE REFINEMENT LAYER (additive; no existing token repurposed) ============ */
+
+  /* --- Apple SF Pro stacks (system stack only; no webfont) --- */
+  --font-text: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* keep --font-display and --font-sans intact (still referenced widely);
+     --font-text applies SF Pro Text explicitly for body/small. */
+
+  /* --- Apple type ramp (size / line-height / tracking). Large titles: tight
+     tracking + tight leading. Body ~17px/1.47/-0.01em. Caption/footnote: slightly
+     POSITIVE tracking for small-size legibility. --- */
+  --fs-large:   clamp(2.7rem, 7.6vw, 5.3rem);  --lh-large:   1.05; --tr-large:   -0.025em;
+  --fs-title1:  clamp(2rem, 4.6vw, 3.4rem);    --lh-title1:  1.06; --tr-title1:  -0.022em;
+  --fs-title2:  clamp(1.4rem, 2.2vw, 1.9rem);  --lh-title2:  1.1;  --tr-title2:  -0.02em;
+  --fs-title3:  clamp(1.2rem, 2vw, 1.55rem);   --lh-title3:  1.12; --tr-title3:  -0.018em;
+  --fs-headline:1.05rem;                       --lh-headline:1.3;  --tr-headline:-0.01em;
+  --fs-body:    1.0625rem;                     --lh-body:    1.47; --tr-body:    -0.01em;  /* ~17px */
+  --fs-callout: 1rem;                          --lh-callout: 1.4;  --tr-callout: -0.006em;
+  --fs-subhead: .94rem;                        --lh-subhead: 1.4;  --tr-subhead: 0em;
+  --fs-footnote:.85rem;                        --lh-footnote:1.4;  --tr-footnote:0.01em;
+  --fs-caption: .72rem;                        --lh-caption: 1.35; --tr-caption: 0.02em;
+
+  /* --- Apple motion: KEEP --ease for all cinematic rAF reveals (DO NOT repurpose).
+     ADD --ease-standard for controls/states; --ease-spring is reused for press/hover elasticity. --- */
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --ease-out-soft: cubic-bezier(.33, .9, .4, 1);
+  --t-micro: .2s;     /* tap/press feedback */
+  --t-std:   .35s;    /* control state change */
+  --t-emph:  .5s;     /* emphasized control (same value as --t-med; control-intent name) */
+
+  /* --- 8pt spacing scale --- */
+  --sp-1:  4px;   --sp-2:  8px;   --sp-3:  12px;  --sp-4:  16px;
+  --sp-5:  24px;  --sp-6:  32px;  --sp-7:  48px;  --sp-8:  64px;
+  --sp-9:  80px;  --sp-10: 96px;  --sp-11: 128px; --sp-12: 160px;
+
+  /* --- Concentric squircle radii (keep --r-card=24). Rule: inner = outer − padding. --- */
+  --r-lg:  32px;   /* bezel shells (card + 8 offset) */
+  --r-md:  16px;   /* nested tiles / inputs */
+
+  /* --- Apple label-tint neutrals (Snow family only; AA-verified on Vault #0E0E10) ---
+     --text #F5F5F2 primary (~18:1), --text-2 #C7C5C0 secondary (~11:1),
+     --text-3 #888780 tertiary (~4.9:1 AA at >=16px). --- */
+  --text-4: #6E6D67;   /* quaternary — decorative/disabled ONLY (~3.4:1); use on >=24px or non-text glyphs */
+
+  /* --- Tahoe translucent fill + separator materials (Snow-tinted, vibrancy-ready) --- */
+  --fill-thin:    rgba(245, 245, 242, .045);  /* quaternary fill */
+  --fill-regular: rgba(245, 245, 242, .07);   /* tertiary fill (hover) */
+  --fill-thick:   rgba(245, 245, 242, .11);   /* secondary fill (active/press) */
+  --separator:    rgba(245, 245, 242, .09);   /* = --hairline; intent-named */
+
+  /* --- pointer-tracked specular driver (defaults give static surfaces a fixed top sheen) --- */
+  --spec-x: 50%;
+  --spec-y: 0%;
 }
 
 /* ---------- Reset / base ---------- */
@@ -66,13 +120,14 @@
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-text);
   background: var(--bg);
   color: var(--text);
-  line-height: 1.6;
-  letter-spacing: -0.01em;
+  line-height: var(--lh-body);
+  letter-spacing: var(--tr-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
   overflow-x: hidden;
   min-height: 100dvh;
 }
@@ -102,6 +157,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 4px;
+  box-shadow: 0 0 0 4px var(--accent-glow);
 }
 
 .shell { width: var(--shell); margin-inline: auto; }
@@ -109,8 +165,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .display {
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.02;
+  letter-spacing: var(--tr-large);
+  line-height: var(--lh-large);
+  font-optical-sizing: auto;
 }
 
 .accent-em { color: var(--accent); font-style: italic; }
@@ -186,11 +243,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   padding: .85rem 1.05rem .85rem 1.4rem;
   border-radius: var(--r-pill);
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tr-headline);
   white-space: nowrap;
-  transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease),
-              border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease),
-              box-shadow var(--t-med) var(--ease);
+  /* Apple motion: transform springs on press (micro + spring overshoot); state changes use the standard curve */
+  transition: transform var(--t-micro) var(--ease-spring), background var(--t-std) var(--ease-standard),
+              border-color var(--t-std) var(--ease-standard), color var(--t-std) var(--ease-standard),
+              box-shadow var(--t-emph) var(--ease-standard);
 }
 .btn:active { transform: scale(.97); }
 
@@ -218,7 +276,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   width: 1.85rem; height: 1.85rem;
   border-radius: var(--r-pill);
   background: rgba(0, 0, 0, .14);
-  transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  transition: transform var(--t-micro) var(--ease-spring), background var(--t-std) var(--ease-standard);
 }
 .btn--lg .btn__icon { width: 2.1rem; height: 2.1rem; }
 .btn__icon svg { width: 1rem; height: 1rem; }
@@ -251,6 +309,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   transition: transform var(--t-med) var(--ease);
 }
 .nav {
+  position: relative;                 /* for the lensed gradient ring (::after) */
   width: var(--shell);
   display: flex;
   align-items: center;
@@ -259,13 +318,34 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   padding: 0 .55rem 0 1.1rem;
   border: 1px solid var(--hairline);
   border-radius: var(--r-pill);
-  background: rgba(14, 14, 18, .55);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  box-shadow: var(--inset-hi), 0 12px 40px -20px rgba(0, 0, 0, .8);
-  transition: box-shadow var(--t-med) var(--ease), background var(--t-med) var(--ease);
+  background: rgba(14, 14, 18, .6);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+          backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .10), 0 14px 44px -22px rgba(0, 0, 0, .85);
+  transition: height var(--t-emph) var(--ease-standard), box-shadow var(--t-emph) var(--ease-standard), background var(--t-emph) var(--ease-standard);
 }
-.nav-shell.is-scrolled .nav { background: rgba(12, 12, 16, .8); }
+/* Tahoe nav specular: a soft top-edge light that tracks the pointer (JS writes --spec-x/--spec-y).
+   Compositor-only (a gradient position); additive white light, AA-safe over the dense nav. */
+.nav::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit; opacity: .7;
+  background: radial-gradient(120px 60px at var(--spec-x, 50%) var(--spec-y, 0%), rgba(245, 245, 242, .14), transparent 70%);
+  transition: opacity var(--t-std) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce), (max-width: 760px) { .nav::before { display: none; } }
+/* keep the nav's real content (brand, links, CTA) above the decorative specular sheen (::before, z1) */
+.nav > * { position: relative; z-index: 2; }
+/* lensed glass edge - same language as the cards */
+.nav::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  border-radius: inherit; padding: 1px;
+  background: linear-gradient(145deg, rgba(245, 245, 242, .26), rgba(245, 245, 242, .05) 42%, rgba(8, 8, 10, .4));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+}
+.nav-shell.is-scrolled .nav { height: 54px; background: rgba(12, 12, 16, .82); }
 .nav-shell.is-hidden { transform: translateY(calc(-100% - 2rem)); }
 
 .nav__brand { display: inline-flex; align-items: center; gap: .55rem; font-weight: 700; font-size: 1.05rem; }
@@ -284,9 +364,10 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   display: block;
   padding: .5rem .85rem;
   border-radius: var(--r-pill);
-  font-size: .94rem;
+  font-size: var(--fs-subhead);
+  letter-spacing: var(--tr-subhead);
   color: var(--text-2);
-  transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  transition: color var(--t-std) var(--ease-standard), background var(--t-std) var(--ease-standard);
 }
 .nav__links a:hover { color: var(--text); background: var(--surface); }
 .nav__cta { padding: .6rem .6rem .6rem 1.1rem; }
@@ -322,8 +403,8 @@ body.menu-open .nav__burger span:last-child  { transform: translate(-50%, 0) rot
   justify-content: center;
   padding: var(--gutter);
   background: rgba(8, 8, 11, .82);
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
+  backdrop-filter: blur(34px) saturate(160%);
+  -webkit-backdrop-filter: blur(34px) saturate(160%);
   opacity: 0;
   visibility: hidden;
   /* delayed-visibility: hide only after the fade-out so the open state is instantly focusable */
@@ -381,6 +462,23 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   background: radial-gradient(60% 80% at 50% 100%, var(--accent-glow), transparent 70%);
   pointer-events: none;
 }
+/* ABOUT portrait reveal: scale-in on the tilt-FREE .portrait-frame__inner (data-tilt owns
+   .portrait-frame's inline transform, so the scale-in must live on a different element), with the
+   gold glow blooming a beat behind. Both .choreo-gated + driven by the existing .about__media.is-in
+   (no new observer/JS). Reduced-motion: .choreo absent -> visible at rest. */
+.choreo #about .portrait-frame__inner {
+  opacity: 0;
+  transform: scale(.96);
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease) .06s;
+}
+.choreo #about .about__media.is-in .portrait-frame__inner { opacity: 1; transform: none; }
+.choreo #about .portrait-frame__glow {
+  opacity: 0;
+  transform: translateY(8px) scale(.9);
+  transform-origin: 50% 100%;
+  transition: opacity var(--t-slow) var(--ease) .12s, transform var(--t-slow) var(--ease) .12s;
+}
+.choreo #about .about__media.is-in .portrait-frame__glow { opacity: 1; transform: none; }
 .portrait-frame__img {
   position: absolute;
   left: 50%;
@@ -427,7 +525,7 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
 }
 .hero__title { font-size: clamp(2.7rem, 7.6vw, 5.3rem); margin: 1.4rem 0 1.5rem; }
 .hero__title span { display: block; }
-.hero__lede { font-size: clamp(1.05rem, 1.5vw, 1.25rem); color: var(--text-2); max-width: 60ch; margin-inline: auto; }
+.hero__lede { font-size: clamp(1.05rem, 1.5vw, 1.25rem); line-height: var(--lh-headline); letter-spacing: var(--tr-headline); color: var(--text-2); max-width: 60ch; margin-inline: auto; }
 .hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .9rem; margin-top: 2.4rem; }
 
 /* ---------- Scroll-scrubbed sequence (opening: hero fused into the reel) ---------- */
@@ -448,9 +546,29 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* fade the corners (and softly the edges) so the clip dissolves into the page */
-  -webkit-mask-image: radial-gradient(86% 86% at 50% 50%, #000 56%, rgba(0, 0, 0, .35) 82%, transparent 100%);
-          mask-image: radial-gradient(86% 86% at 50% 50%, #000 56%, rgba(0, 0, 0, .35) 82%, transparent 100%);
+  /* full-bleed 4K: no corner mask. The old radial faded the edges to transparent, which read as an
+     oval "mask" on the bright (studio) beat. The veil's top/bottom Vault fades + the grade vignette
+     still frame the reel cinematically — without the portal feeling. Edge-to-edge image. */
+  -webkit-mask-image: none;
+          mask-image: none;
+  /* COLD-OPEN beat 3 - camera dolly: a slow push-in driven by --dolly (set on .seq__pin by seqTick,
+     inherited here). Origin toward the operator's face. Scale floor is exactly 1.000 so the cover-fit
+     overfill always covers the corner-fade mask (no transparent ring). draw math untouched - this is a
+     pure compositor scale ON the element (never an ancestor, which would break canvas.getBoundingClientRect). */
+  transform: scale(var(--dolly, 1));
+  transform-origin: 50% 44%;
+  will-change: transform;
+  /* COLOR GRADE (tone): one filmic grade over the whole reel so the bright studio beat and the cool
+     datacenter beat read as ONE film. brightness(.965) lifts the blown studio off clipping ->
+     contrast(1.06) graphite snap -> saturate(.88) is the de-cast workhorse (drains BOTH the warm
+     studio and the cyan datacenter chroma so neither reads as a separate source) -> hue-rotate(-7deg)
+     biases the residual hue warm toward gold (no sepia => no orange) -> trailing brightness(1.005) is
+     a flat ~0.5% re-lift after the contrast/saturate dip (global, not highlight-selective). The
+     5-stage filter re-composites with the --dolly scale during the push-in; cost is accepted at the
+     desktop ceiling (DPR capped at 2; phones collapse to the static poster, canvas display:none).
+     Composites on top of the --dolly transform (independent); draw math untouched; persists into the
+     static poster for free. */
+  filter: brightness(0.965) contrast(1.06) saturate(0.88) hue-rotate(-7deg) brightness(1.005);
 }
 .seq__poster { z-index: 0; }   /* base layer: shows while frames decode + static fallback */
 .seq__canvas { z-index: 1; }   /* drawn cover-fit, DPR-aware, in JS */
@@ -462,21 +580,70 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   /* dissolve the clip OUT OF the hero's black: long, deep top fade so the
      showreel emerges from darkness instead of meeting the hero as a white wall.
      bottom fade + vignette unchanged in spirit, just slightly deeper. */
+  /* long, soft top+bottom fades so the full-bleed reel dissolves into Vault with NO hard seam */
   background:
-    linear-gradient(180deg, var(--bg) 0%, var(--bg) 7%, transparent 36%, transparent 72%, var(--bg) 100%),
-    radial-gradient(130% 92% at 50% 42%, transparent 30%, rgba(7, 7, 9, .62) 100%);
+    linear-gradient(180deg,
+      var(--bg) 0%, rgba(14, 14, 16, .82) 5%, transparent 32%,
+      transparent 58%, rgba(14, 14, 16, .72) 86%, var(--bg) 100%),
+    radial-gradient(135% 95% at 50% 42%, transparent 32%, rgba(7, 7, 9, .58) 100%);
 }
-/* opening curtain: near-opaque Vault + soft gold vignette so the headline reads on
-   near-black at rest; JS lifts opacity 1 -> 0 by p~=0.20 so the reel brightens in.
-   default .97 = the rest state, so the open looks right before/without JS. */
+/* COLOR GRADE (finish, z2): static cinematic overlay over the image plane only. z2 paints over the
+   reel (poster z0 / canvas z1, and above the veil z2 by source order) but UNCONDITIONALLY below
+   chapters/rail (z3), bloom (z4), curtain (z5) and the headline (z6) - so it never washes type or
+   fights the at-rest title under the curtain, regardless of DOM order. All low-alpha normal-blend
+   gradients -> one composited layer, no per-frame work, no will-change. background paints top->bottom:
+   gold core + key wash sit OVER the vignette/lift so highlights stay warm even where corners darken. */
+.seq__grade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    /* soft-gold core: lights-up beat reads gold-kissed, not flat (brand soft #EBD6A8) */
+    radial-gradient(34% 26% at 50% 40%, rgba(235, 214, 168, .085) 0%, transparent 66%),
+    /* wider Starlight-Gold key kiss at the key-light center (matches veil/bloom) */
+    radial-gradient(58% 44% at 50% 42%, rgba(201, 168, 118, .07) 0%, rgba(201, 168, 118, .03) 40%, transparent 70%),
+    /* filmic vignette - Vault corners, clear through the center 52%; shallower than the veil's .62 so they don't double into mud */
+    radial-gradient(124% 96% at 50% 44%, transparent 52%, rgba(14, 14, 16, .30) 84%, rgba(14, 14, 16, .50) 100%),
+    /* shadow lift: settle blacks onto brand graphite (flat low wash, can't band) */
+    linear-gradient(0deg, rgba(14, 14, 16, .10), rgba(14, 14, 16, .10));
+}
+/* COLD-OPEN beat 4 - key-light bloom (z4): a soft Snow/Gold light that blooms up from BEHIND
+   the figure as the curtain lifts, like a key light switching on. Sits above the reel/veil/chapters
+   but below the curtain + headline, so it never washes the legible white type. No mix-blend-mode
+   (avoids the screen-blend "gamer-glow" trap). JS drives --bloom (scale) + its opacity. */
+.seq__bloom {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(var(--bloom, .92));
+  transform-origin: 50% 44%;
+  will-change: transform, opacity;
+  background: radial-gradient(70% 55% at 50% 44%,
+    rgba(245, 245, 242, .18), rgba(201, 168, 118, .10) 38%, transparent 70%);
+}
+/* opening curtain (z5): COLD-OPEN beat 1 - "living black". A near-opaque Vault with a soft gold key
+   glow + two faint static light-rays so the at-rest near-black has volumetric depth (painted once,
+   never per-frame, no keyframe). JS rides opacity 1 -> 0 by p~=0.20 to light the reel up, then dims
+   it back toward Vault on exit (beat 7). default .97 = rest state, so the open reads before/without JS. */
 .seq__open {
   position: absolute;
   inset: 0;
   z-index: 5;
   pointer-events: none;
   opacity: .97;
+  /* JS rides opacity every frame during the open (p 0->.20) and exit (p .9->1). Promote to its own
+     layer so this expensive conic+radial stack rasterizes ONCE and only the alpha composites - no
+     per-frame full-viewport repaint. (display:none in both collapse paths, so no idle cost there.) */
+  will-change: opacity;
   background:
     radial-gradient(120% 88% at 50% 38%, rgba(201, 168, 118, .07), transparent 56%),
+    radial-gradient(58% 40% at 50% 30%, rgba(201, 168, 118, .05), transparent 60%),
+    conic-gradient(from 212deg at 50% 16%,
+      transparent 0deg, rgba(235, 214, 168, .030) 16deg, transparent 38deg,
+      transparent 322deg, rgba(235, 214, 168, .026) 344deg, transparent 360deg),
     var(--bg);
 }
 /* headline overlay: rests centered on the curtain, then JS lifts + fades + scales it
@@ -497,6 +664,27 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
 .seq__hero .btn { pointer-events: auto; }
 .seq__hero.is-gone a,
 .seq__hero.is-gone .btn { pointer-events: none; }   /* past the fade: not clickable */
+/* COLD-OPEN beat 5 - cinematic letterbox (z8, topmost in pin). Two Vault bars are ::before/::after,
+   parked off-canvas at rest (translateY +-100%, zero layout) and driven IN/OUT by a single --bar var
+   that seqTick sets on .seq__pin. translateY (not scaleY) keeps a crisp edge. No hairline gate line -
+   Vault-on-Vault frames the reel without being noticed. nav-shell is fixed in its own stacking context,
+   so z8 never touches the nav. */
+/* NOTE: --bar is set by seqTick on .seq__pin and INHERITED here. Do NOT declare --bar on .seq__bars
+   itself - that would shadow the inherited value and freeze the bars. The calc() fallback (,0) is the
+   rest/no-JS default so the bars stay parked off-canvas. */
+.seq__bars { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+/* GRADIENT letterbox bars: Vault at the outer edge feathering to transparent at the inner edge, so the
+   cinematic frame has NO razor seam where it meets the reel (taller than before for a soft feather).
+   no will-change: translateY composites cheaply on demand. */
+.seq__bars::before,
+.seq__bars::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 14vh;
+}
+.seq__bars::before { top: 0;    background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 26%, transparent 100%); transform: translateY(calc(-100% + var(--bar, 0) * 100%)); }
+.seq__bars::after  { bottom: 0; background: linear-gradient(to top,    var(--bg) 0%, var(--bg) 26%, transparent 100%); transform: translateY(calc( 100% - var(--bar, 0) * 100%)); }
 .seq__chapters {
   position: absolute;
   inset: 0;
@@ -507,6 +695,7 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   pointer-events: none;
 }
 .seq__chapter {
+  position: relative;        /* anchor the text-scoped scrim ::before */
   grid-area: 1 / 1;          /* stack all chapters in one cell, centered */
   display: flex;
   flex-direction: column;
@@ -514,14 +703,30 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
   gap: .55rem;
   max-width: 820px;
   text-align: center;
-  text-shadow: 0 2px 30px rgba(0, 0, 0, .6);
+  /* layered shadow: tight contact + wide diffuse so the words hold on any frame (incl. the busy datacenter) */
+  text-shadow: 0 1px 2px rgba(14, 14, 16, .85), 0 2px 40px rgba(14, 14, 16, .55);
   opacity: 0;
   transform: translateY(16px);
   transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
 }
+.seq__chapter > * { position: relative; z-index: 1; }  /* text sits above its own scrim */
+/* a whisper of dark scrim behind the chapter TEXT only (elliptical, fades out well inside the frame) */
+.seq__chapter::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 118%; height: 150%;
+  /* whisper-soft on bright studio mid-frames (the layered text-shadow carries legibility on the dark
+     datacenter frame, where this Vault scrim is near-invisible anyway) */
+  background: radial-gradient(ellipse 62% 58% at 50% 50%,
+    rgba(14, 14, 16, .38) 0%, rgba(14, 14, 16, .22) 42%, transparent 72%);
+  pointer-events: none;
+}
 .seq__chapter.is-active { opacity: 1; transform: translateY(0); }
 .seq__chapter h2 { font-size: clamp(2.4rem, 6.5vw, 5rem); letter-spacing: -0.03em; line-height: 1; }
-.seq__chapter p { color: var(--text-2); font-size: clamp(1rem, 1.6vw, 1.2rem); }
+.seq__chapter p { color: rgba(245, 245, 242, .86); font-size: clamp(1rem, 1.6vw, 1.2rem); }  /* Snow @86% - holds on bright mid-frames, still subordinate to the h2 */
 .seq__rail {
   position: absolute;
   left: 50%; bottom: clamp(1.5rem, 4vh, 2.6rem);
@@ -590,10 +795,20 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
 }
 .seq.is-static .seq__canvas,
 .seq.is-static .seq__veil,
+.seq.is-static .seq__grade,
 .seq.is-static .seq__open,
+.seq.is-static .seq__bloom,
+.seq.is-static .seq__bars,
 .seq.is-static .seq__loader,
 .seq.is-static .seq__rail,
 .seq.is-static .seq__cue { display: none; }
+/* cold-open layers never apply in the static fallback; neutralize the dolly scale, and drop the
+   will-change promotions so the low-power/static path holds no unused compositor layers */
+.seq.is-static .seq__poster,
+.seq.is-static .seq__canvas { transform: none; }
+.seq.is-static .seq__hero,
+.seq.is-static .seq__poster,
+.seq.is-static .seq__canvas { will-change: auto; }
 .seq.is-static .seq__hero {
   position: relative;
   inset: auto;
@@ -650,10 +865,13 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
 .marquee__track img {
   height: 26px;
   width: auto;
-  opacity: .55;
+  /* icons are monochrome (#8b8b94); lift them to a soft Snow-mute texture so they read once the
+     marquee arrives out of the exit-dim - present, not focal. No invert (already grey). */
+  opacity: .72;
+  filter: brightness(1.12);
   transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
 }
-.marquee__track img:hover { opacity: 1; transform: translateY(-2px); }
+.marquee__track img:hover { opacity: 1; filter: brightness(1); transform: translateY(-2px); }
 @keyframes scroll-x {
   to { transform: translateX(-50%); }
 }
@@ -661,37 +879,31 @@ body.menu-open .nav-overlay__links a { opacity: 1; transform: translateY(0); }
 /* ---------- Section heads ---------- */
 .sec-head { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
 .sec-head .eyebrow { margin-bottom: 1.2rem; }
-.sec-title { font-size: clamp(2rem, 4.6vw, 3.4rem); max-width: 18ch; }
+.sec-title { font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: var(--lh-title1); letter-spacing: var(--tr-title1); max-width: 18ch; }
 
 section[id], #top { scroll-margin-top: 100px; }
 #top:focus { outline: none; } /* skip-link target: focus moves here, no box ring on the page wrapper */
 .work, .about, .caps { padding-block: var(--section); }
 
-/* ---------- Bento (work) ---------- */
-.bento {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(1rem, 2vw, 1.5rem);
-  align-items: stretch;
-}
-.card--feature { grid-row: span 2; }
-/* feature media grows to fill the 2-row span (no empty voids) */
-.card--feature .card__media { aspect-ratio: auto; flex: 1 1 auto; min-height: 340px; }
-
+/* ---------- Work: card base (shared by pinned + native paths) ---------- */
 .card {
   position: relative;
   border-radius: var(--r-card);
-  background: var(--surface);
+  /* Liquid Glass: low-alpha Snow wash over Vault + backdrop blur so the aurora/grain read through.
+     The light-catching rim is the inset top highlight; the lensed edge is the gradient ring (::after). */
+  background: rgba(245, 245, 242, .05);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+          backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid var(--hairline);
-  box-shadow: var(--inset-hi);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .10), 0 16px 50px -28px rgba(0, 0, 0, .7);
   overflow: hidden;
   /* NB: transform is scroll-driven by frame() (reveal) on .card and hover-tilt on .card__inner,
      so it is intentionally NOT transitioned here (would lag the scrubbed reveal). */
   transition: border-color var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
 }
 .card:hover {
-  border-color: var(--hairline-strong);
-  box-shadow: var(--shadow-card), var(--inset-hi);
+  border-color: var(--accent-glow);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .14), var(--shadow-card), 0 0 0 1px rgba(201, 168, 118, .14);
 }
 .card__inner { display: flex; flex-direction: column; height: 100%; }
 .card__media { position: relative; overflow: hidden; aspect-ratio: 16 / 10; }
@@ -715,9 +927,9 @@ section[id], #top { scroll-margin-top: 100px; }
   border: 1px solid var(--accent-glow);
   background: rgba(201, 168, 118, .06);
 }
-.card__year { font-size: .85rem; color: var(--text-3); font-variant-numeric: tabular-nums; }
-.card__title { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.4rem, 2.2vw, 1.9rem); letter-spacing: -0.02em; }
-.card__desc { color: var(--text-2); font-size: .98rem; max-width: 48ch; }
+.card__year { font-size: var(--fs-footnote); letter-spacing: var(--tr-footnote); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.card__title { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.4rem, 2.2vw, 1.9rem); letter-spacing: var(--tr-title2); line-height: var(--lh-title2); }
+.card__desc { color: var(--text-2); font-size: var(--fs-callout); line-height: var(--lh-callout); letter-spacing: var(--tr-callout); max-width: 48ch; }
 
 /* gradient placeholders (abstract, on-brand; no stock photos) */
 .card__media { background: linear-gradient(160deg, #14141b, #0b0b0e); }
@@ -756,6 +968,107 @@ section[id], #top { scroll-margin-top: 100px; }
 .card__status--dev { color: var(--text); }
 .card__status--research { color: var(--text-3); }
 
+/* ============================================================
+   WORK: pinned horizontal cinematic gallery (replaces the bento).
+   The card, card__ parts, gradient, chip, and status styling are all unchanged - just re-flowed
+   horizontally. Single switch class: .work--pinned (JS adds it only on the pinned path - progressive
+   enhancement: no-JS / pre-JS / touch / reduced-motion = native scroll-snap strip).
+   ============================================================ */
+.work__rail, .work__counter { display: none; }   /* shown only on the pinned path */
+
+/* ---- Pinned path (desktop / fine pointer / motion allowed) ---- */
+#work.work--pinned {
+  position: relative;
+  height: 380vh;                 /* pacing knob: ~340 snappier .. ~420 more dwell; travel auto-recomputes */
+  width: 100%; max-width: none; margin-inline: 0; padding-block: 0;   /* full-bleed: override .shell */
+}
+.work--pinned .work__pin {
+  position: sticky; top: 0;
+  height: 100dvh; overflow: hidden;
+  display: flex; align-items: center;
+}
+.work--pinned .work__track {
+  display: flex; align-items: center;
+  gap: clamp(1.4rem, 3vw, 2.4rem);
+  height: 76dvh;
+  /* JS overwrites --work-lead/--work-trail once (lazy) + on resize; vw defaults keep it ~centered pre-measure */
+  padding-left: var(--work-lead, 19vw);
+  padding-right: var(--work-trail, 28vw);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+.work--pinned .work__panel { flex: 0 0 44vw; display: flex; height: 70dvh; }
+.work--pinned .work__panel:first-child { flex: 0 0 62vw; height: 76dvh; }   /* feature card reads as the hero panel */
+.work--pinned .work__panel > .card {
+  width: 100%; height: 100%;
+  will-change: transform, opacity;     /* focus scale/opacity (compositor); .card never transitions transform */
+}
+.work--pinned .card__inner { height: 100%; }
+.work--pinned .card__media { aspect-ratio: auto; flex: 1 1 auto; min-height: 0; }   /* media fills the tall panel */
+.work--pinned .card__body { flex: 0 0 auto; }
+/* keyboard legibility guard: a focused card is always full-contrast + unscaled, even mid-lerp -
+   incl. its media-parallax ::before (the guard on .card doesn't reach the descendant pseudo's --mpy drift) */
+.work--pinned .card:focus-within { opacity: 1 !important; transform: none !important; }
+.work--pinned .card:focus-within .card__media[class*="--g"]::before { transform: none !important; }
+
+/* persistent stage label in the pin corner */
+.work--pinned .work__label {
+  position: absolute; left: var(--gutter); top: clamp(1.4rem, 5vh, 2.4rem);
+  z-index: 4; pointer-events: none;
+  display: flex; flex-direction: column; gap: .4rem; max-width: 26ch;
+}
+.work--pinned .work__label .sec-title { font-size: clamp(1.1rem, 2vw, 1.5rem); max-width: none; opacity: .92; }
+.work--pinned .work__label .eyebrow { margin: 0; }
+.work__counter {
+  font-family: var(--font-display); font-weight: 600;
+  font-variant-numeric: tabular-nums; letter-spacing: .04em;
+  color: var(--text-3); font-size: .92rem;
+}
+.work__counter #work-index { color: var(--accent); }
+/* rail - same language as .seq__rail */
+.work__rail {
+  position: absolute; left: 50%; bottom: clamp(1.5rem, 4vh, 2.6rem);
+  transform: translateX(-50%); z-index: 4;
+  width: min(280px, 56vw); height: 2px;
+  border-radius: var(--r-pill); background: var(--hairline-strong); overflow: hidden;
+}
+.work__rail-fill { display: block; width: 100%; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; }
+.work--pinned .work__rail, .work--pinned .work__counter { display: block; }
+
+/* ---- Native horizontal scroll-snap strip (default / no-JS / touch / coarse / <=760) ---- */
+#work:not(.work--pinned) .work__label { margin-bottom: clamp(2rem, 4vw, 3rem); }
+#work:not(.work--pinned) .work__track {
+  display: flex;
+  gap: clamp(1rem, 3vw, 1.6rem);
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  padding-inline: max(var(--gutter), calc((100% - 82vw) / 2));   /* first/last can center-snap */
+  scroll-padding-inline: max(var(--gutter), calc((100% - 82vw) / 2));
+  scrollbar-width: none;            /* Firefox: hide scrollbar tastefully */
+}
+#work:not(.work--pinned) .work__track::-webkit-scrollbar { display: none; }   /* WebKit/Blink */
+#work:not(.work--pinned) .work__panel { flex: 0 0 82vw; scroll-snap-align: center; }
+#work:not(.work--pinned) .card__media { aspect-ratio: 16 / 10; }
+
+/* ---- Reduced motion: calm centered wrapped grid - no pin/scrub/scaling, no horizontal scroll/snap.
+   Selectors carry :not(.work--pinned) to match the native-strip rules' specificity (1,2,0) and win by
+   source order (.work--pinned is never added under reduced-motion, so :not always matches here). ---- */
+@media (prefers-reduced-motion: reduce) {
+  #work { height: auto !important; }
+  #work .work__pin { position: static; height: auto; overflow: visible; display: block; }
+  #work:not(.work--pinned) .work__label { margin-bottom: clamp(2rem, 4vw, 3rem); }
+  #work:not(.work--pinned) .work__track {
+    transform: none;
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: clamp(1rem, 2vw, 1.5rem); padding-inline: 0;
+    overflow: visible; scroll-snap-type: none;
+    will-change: auto; height: auto;
+  }
+  #work:not(.work--pinned) .work__panel { flex: 0 0 min(420px, 86vw); scroll-snap-align: none; }
+  #work .card { transform: none !important; opacity: 1 !important; }   /* belt-guard if .choreo lands but workTick idle */
+  #work:not(.work--pinned) .card__media { aspect-ratio: 16 / 10; flex: 0 0 auto; min-height: 0; }
+}
+
 /* ---------- Patents (the quiet centerpiece) ---------- */
 .patents { padding-block: var(--section); }
 .patents__head { max-width: 760px; }
@@ -778,22 +1091,49 @@ section[id], #top { scroll-margin-top: 100px; }
   margin-top: clamp(2.5rem, 5vw, 4rem);
 }
 .patent {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: .7rem;
   padding: clamp(1.4rem, 2.4vw, 2rem);
   border-radius: var(--r-card);
-  background: var(--surface);
+  background: rgba(245, 245, 242, .05);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+          backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid var(--hairline);
-  box-shadow: var(--inset-hi);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .10), 0 16px 50px -28px rgba(0, 0, 0, .7);
   /* transform is scroll-driven by frame() (reveal), so not transitioned; hover "lift" is shadow-based */
   transition: border-color var(--t-med) var(--ease), background var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
 }
-.patent:hover { border-color: var(--hairline-strong); background: var(--surface-2); }
+.patent:hover { border-color: var(--accent-glow); box-shadow: inset 0 1px 0 rgba(245, 245, 242, .14), var(--shadow-card), 0 0 0 1px rgba(201, 168, 118, .14); }
+/* lensed gradient edge (brighter top-left -> darker bottom-right) + cursor specular, shared by card + patent */
+.card::after, .patent::after {
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  border-radius: inherit; padding: 1px;
+  background: linear-gradient(145deg, rgba(245, 245, 242, .24), rgba(245, 245, 242, .05) 38%, rgba(8, 8, 10, .45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  transition: background var(--t-med) var(--ease);
+}
+.card:hover::after, .patent:hover::after {
+  background: linear-gradient(145deg, var(--accent-glow), rgba(245, 245, 242, .08) 45%, rgba(8, 8, 10, .4));
+}
+.patent::before {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  border-radius: inherit; opacity: 0;
+  transition: opacity var(--t-med) var(--ease);
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(245, 245, 242, .10), transparent 60%);
+}
+.patent:hover::before { opacity: 1; }
+/* The Home Work gallery cards translate + scale every frame, so they skip the per-frame-expensive
+   backdrop blur (perf) while keeping the glass language: ring + rim + specular + faint fill. */
+#work .card { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(245, 245, 242, .045); }
 .patent--wide { grid-column: 1 / -1; }
 .patent__top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .patent__no {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: .82rem; letter-spacing: 0.04em;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
@@ -802,8 +1142,8 @@ section[id], #top { scroll-margin-top: 100px; }
   font-size: .7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-3);
 }
-.patent__title { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.2rem, 2vw, 1.55rem); letter-spacing: -0.02em; line-height: 1.1; }
-.patent__desc { color: var(--text-2); font-size: .98rem; max-width: 56ch; }
+.patent__title { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.2rem, 2vw, 1.55rem); letter-spacing: var(--tr-title3); line-height: var(--lh-title3); }
+.patent__desc { color: var(--text-2); font-size: var(--fs-callout); line-height: var(--lh-callout); letter-spacing: var(--tr-callout); max-width: 56ch; }
 
 /* ---------- About (portrait + statement + stats) ---------- */
 .about__grid {
@@ -821,7 +1161,7 @@ section[id], #top { scroll-margin-top: 100px; }
   line-height: 1.12;
   margin-bottom: .3rem;
 }
-.about__content p { color: var(--text-2); font-size: 1.06rem; max-width: 52ch; }
+.about__content p { color: var(--text-2); font-size: var(--fs-body); line-height: var(--lh-body); letter-spacing: var(--tr-body); max-width: 52ch; }
 .about__edu { color: var(--text-3); font-size: .92rem; margin-top: .4rem; }
 .stats {
   display: grid;
@@ -842,6 +1182,15 @@ section[id], #top { scroll-margin-top: 100px; }
   align-items: baseline;
 }
 .stat__plus, .stat__unit { color: var(--accent); font-size: .6em; margin-left: .08em; }
+.stat__num { display: inline-block; font-variant-numeric: tabular-nums; }  /* steady width while ticking */
+/* the "0 bytes" stat does not climb - it lands with a deliberate scale/opacity settle on the same beat
+   (armed by .is-counting). .choreo-gated, so reduced-motion / no-JS shows a static, full-opacity 0. */
+.choreo .stat__num--zero {
+  opacity: .35;
+  transform: scale(.86);
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+}
+.choreo .stats.is-counting .stat__num--zero { opacity: 1; transform: none; }
 
 /* ---------- Capabilities (editorial list) ---------- */
 .caps__list { border-top: 1px solid var(--hairline); }
@@ -849,7 +1198,9 @@ section[id], #top { scroll-margin-top: 100px; }
   border-bottom: 1px solid var(--hairline);
   transition: background var(--t-med) var(--ease);
 }
-.cap:hover { background: var(--surface); }
+/* caps are editorial list rows, not card boxes - glass-toned hover (no per-row blur box: keeps the
+   list clean + avoids stacking blur layers); the lensed-edge language lives on the real card surfaces. */
+.cap:hover { background: rgba(245, 245, 242, .05); box-shadow: inset 0 1px 0 rgba(245, 245, 242, .06); }
 .cap__row {
   display: grid;
   grid-template-columns: minmax(0, 18rem) 1fr;
@@ -877,16 +1228,72 @@ section[id], #top { scroll-margin-top: 100px; }
   transition: transform var(--t-med) var(--ease), color var(--t-fast) var(--ease);
 }
 .cap:hover .cap__name { color: var(--accent); transform: translateX(8px); }
-.cap__detail { color: var(--text-2); font-size: 1.02rem; max-width: 54ch; }
+.cap__detail { color: var(--text-2); font-size: var(--fs-callout); line-height: var(--lh-callout); letter-spacing: var(--tr-callout); max-width: 54ch; }
+
+/* --- editorial index 01-04: pure CSS counter on ::after (::before is the hairline). Decorative,
+       invisible to AT. Absolute in the row's left gutter so it never disturbs the 2-col grid. --- */
+.caps__list { counter-reset: cap; }
+.cap { counter-increment: cap; }
+.cap__row::after {
+  content: counter(cap, decimal-leading-zero);
+  position: absolute;
+  top: clamp(1.6rem, 3vw, 2.4rem); left: clamp(1rem, 2vw, 1.6rem);
+  transform: translateY(-.85em);
+  font-family: var(--font-mono);
+  font-size: .7rem; letter-spacing: .12em; line-height: 1;
+  color: var(--accent-deep);
+  pointer-events: none;
+}
+/* --- hairline: draws to a DIM resting state on ENTRY (rides --d), BRIGHTENS on hover/focus. Keeps the
+       existing .cap:hover ::before { scaleX(1) } (now co-acting as "brighten"). Gated on .choreo for the
+       entry draw so reduced-motion shows the base state and only brightens on hover (a state change). --- */
+.cap__row::before {
+  opacity: 0;
+  transition: transform var(--t-slow) var(--ease) var(--d, 0s),
+              opacity   var(--t-med)  var(--ease) var(--d, 0s),
+              box-shadow var(--t-med) var(--ease);
+}
+.choreo .cap[data-reveal].is-in .cap__row::before { transform: scaleX(1); opacity: .28; }
+.cap:hover .cap__row::before,
+.cap:focus-within .cap__row::before { transform: scaleX(1); opacity: 1; box-shadow: 0 0 10px var(--accent-glow); }
+/* the entry-draw rule above (0,5,1) outweighs the plain hover rule (0,3,1) on the motion path, so the
+   hairline would stay dim on hover - this override (0,6,1) lets it actually brighten to full opacity. */
+.choreo .cap[data-reveal].is-in:hover .cap__row::before,
+.choreo .cap[data-reveal].is-in:focus-within .cap__row::before { opacity: 1; }
+/* --- row lift on the tilt-FREE .cap__row (data-tilt owns the <li> transform) --- */
+.cap__row { transition: transform var(--t-med) var(--ease); }
+.cap:hover .cap__row,
+.cap:focus-within .cap__row { transform: translateY(-2px); }
+/* focus-within mirrors hover for keyboard parity IF a focusable child is ever added (inert today -
+   the rows are non-interactive descriptive content, so they correctly get NO tabindex/focus stop). */
+.cap:focus-within .cap__name { color: var(--accent); transform: translateX(8px); }
 
 /* ---------- Contact ---------- */
-.contact { padding-block: clamp(6rem, 16vh, 13rem); text-align: center; }
-.contact__inner { display: flex; flex-direction: column; align-items: center; }
+.contact { padding-block: clamp(6rem, 16vh, 13rem); text-align: center; position: relative; overflow: hidden; }
+.contact__inner { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; }
+/* restrained ambient gold field behind the closing block - atmosphere, not a light show. Clipped to the
+   section by overflow:hidden; sits under .contact__inner (z0); JS drifts it a few px in the frame() rAF. */
+.contact__orb {
+  position: absolute; z-index: 0; left: 50%; top: 50%;
+  width: min(70vw, 680px); aspect-ratio: 1; border-radius: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  background: radial-gradient(circle, var(--accent-glow), transparent 68%);
+  filter: blur(100px); opacity: .16;
+  pointer-events: none; will-change: transform;
+}
+/* CTA gold glow bloom on hover/focus (box-shadow only; composites under the magnetic translate) */
+.contact .btn--primary:hover,
+.contact .btn--primary:focus-visible {
+  box-shadow: 0 0 0 1px rgba(201, 168, 118, .4),
+              0 18px 60px -12px var(--accent-glow),
+              0 0 40px -6px var(--accent-glow),
+              var(--inset-hi);
+}
 .contact__title {
   font-size: clamp(2.6rem, 8vw, 6rem);
   max-width: 14ch;
 }
-.contact__lede { color: var(--text-2); font-size: 1.15rem; margin: 1.4rem 0 2.4rem; max-width: 42ch; }
+.contact__lede { color: var(--text-2); font-size: 1.15rem; line-height: var(--lh-headline); margin: 1.4rem 0 2.4rem; max-width: 42ch; }
 
 /* ---------- Footer ---------- */
 .footer { padding-block: 3rem 2.5rem; border-top: 1px solid var(--hairline); }
@@ -899,7 +1306,7 @@ section[id], #top { scroll-margin-top: 100px; }
   padding-bottom: 2rem;
 }
 .footer__brand { display: inline-flex; align-items: center; gap: .55rem; font-weight: 700; font-size: 1.1rem; }
-.footer__nav { display: flex; flex-wrap: wrap; gap: 1.4rem; }
+.footer__nav { display: flex; flex-wrap: wrap; gap: var(--sp-5); }
 .footer__nav a { color: var(--text-2); font-size: .95rem; transition: color var(--t-fast) var(--ease); }
 .footer__nav a:hover { color: var(--text); }
 .footer__social { display: flex; gap: .6rem; }
@@ -950,8 +1357,7 @@ section[id], #top { scroll-margin-top: 100px; }
    ============================================================ */
 
 /* hidden start-state for scroll-choreographed items (revealed by frame() progress) */
-.choreo #work .bento > .card,
-.choreo #patents .patent { opacity: 0; }
+.choreo #patents .patent { opacity: 0; }   /* Work is owned by workTick now (cards visible at rest) */
 
 /* cursor-follow specular highlight on Work cards (fine pointer; JS sets --mx/--my) */
 .card::before {
@@ -967,7 +1373,7 @@ section[id], #top { scroll-margin-top: 100px; }
 }
 .card:hover::before { opacity: 1; }
 .card:hover .chip { transform: translateY(-1px); }
-.chip { transition: transform var(--t-fast) var(--ease); }
+.chip { transition: transform var(--t-micro) var(--ease-spring); }
 
 /* Patents: No. underline draws in on reveal; card lifts + gold edge on hover */
 .patent__no { position: relative; }
@@ -1042,16 +1448,12 @@ section[id], #top { scroll-margin-top: 100px; }
   .about__grid { grid-template-columns: 1fr; gap: 2.4rem; }
   .about__media { justify-content: center; }
   .portrait-frame { width: min(320px, 66vw); }
-  .bento { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 680px) {
   :root { --section: clamp(4rem, 12vh, 6rem); }
 
-  .bento { grid-template-columns: 1fr; }
   .patents__grid { grid-template-columns: 1fr; }
-  .card--feature { grid-column: auto; grid-row: auto; }
-  .card--feature .card__media { aspect-ratio: 16 / 10; flex: 0 0 auto; min-height: 0; }
 
   .cap__row { grid-template-columns: 1fr; gap: .6rem; }
   .stats { gap: .8rem; }
@@ -1073,7 +1475,7 @@ section[id], #top { scroll-margin-top: 100px; }
   [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
   .reveal-wipe .wipe-line { transform: none !important; }
   .marquee__track { animation: none; }
-  .orb { display: none; }
+  .orb, .contact__orb { display: none; }
   /* motion-pass effects collapse: no specular, no media parallax, no scan */
   .card::before { display: none; }
   .card__media[class*="--g"]::before { transform: none !important; }
@@ -1081,7 +1483,11 @@ section[id], #top { scroll-margin-top: 100px; }
   /* opening collapses to a static hero -> poster -> stacked chapters (enforced even if JS is absent) */
   .seq { height: auto; }
   .seq__pin { position: relative; display: block; height: auto; min-height: 0; padding-block: var(--section); }
-  .seq__canvas, .seq__veil, .seq__open, .seq__loader, .seq__rail, .seq__cue { display: none; }
+  .seq__canvas, .seq__veil, .seq__grade, .seq__open, .seq__bloom, .seq__bars, .seq__loader, .seq__rail, .seq__cue { display: none; }
+  /* neutralize the cold-open dolly scale with JS off (var defaults to 1, but be explicit) + drop the
+     will-change promotions so the reduced-motion path holds no unused compositor layers */
+  .seq__poster, .seq__canvas { transform: none !important; }
+  .seq__hero, .seq__poster, .seq__canvas { will-change: auto; }
   .seq__hero { position: relative; inset: auto; z-index: auto; opacity: 1 !important; transform: none !important; pointer-events: auto; padding: 0 var(--gutter); margin-bottom: clamp(3rem, 7vh, 5rem); }
   .seq__poster { position: relative; inset: auto; z-index: auto; width: min(var(--shell), 100%); height: auto; aspect-ratio: 16 / 9; margin-inline: auto; border-radius: var(--r-card); -webkit-mask-image: none; mask-image: none; }
   .seq__chapters { position: relative; inset: auto; grid-auto-flow: row; gap: clamp(1.4rem, 4vw, 2.4rem); margin-top: clamp(2.4rem, 6vh, 4rem); }
@@ -1092,4 +1498,515 @@ section[id], #top { scroll-margin-top: 100px; }
   .nav { background: #161618; backdrop-filter: none; -webkit-backdrop-filter: none; }
   .nav-overlay { background: #0E0E10; backdrop-filter: none; -webkit-backdrop-filter: none; }
   .portrait-badge { background: #161922; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .card, .patent { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(245, 245, 242, .045); }
+}
+
+/* Liquid Glass falls back to a solid translucent fill (no blur) on the low-end / static paths:
+   reduced-motion and mobile (backdrop-filter is GPU-heavy). Ring + rim + shadow are kept (cheap). */
+@media (prefers-reduced-motion: reduce) {
+  .card, .patent { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(245, 245, 242, .045); }
+  /* reduced-motion also drops the (now heavier) nav/overlay blur -> solid fill (matches the mobile path) */
+  .nav, .nav-overlay { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .nav { background: rgba(18, 18, 22, .92); }
+  .nav-overlay { background: rgba(10, 10, 13, .98); }
+}
+@media (max-width: 760px) {
+  .card, .patent { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(245, 245, 242, .05); }
+  /* mobile: drop the (now heavier) nav/overlay blur -> near-opaque solid fill, still legible over scroll */
+  .nav, .nav-overlay { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .nav { background: rgba(18, 18, 22, .92); }
+  .nav-overlay { background: rgba(10, 10, 13, .98); }
+}
+
+/* ============================================================
+   MULTI-PAGE conventions (subpages + nav active + empty states).
+   Brand hex/tokens untouched; uses ONLY existing vars. No new colors,
+   no infinite animations.
+   ============================================================ */
+
+/* ---- Nav: Resume secondary action + actions cluster ---- */
+.nav__actions { display: inline-flex; align-items: center; gap: .5rem; }
+
+/* ---- Active nav/overlay item (current page) - rides the existing ::after underline ---- */
+.nav__links a[aria-current="page"],
+.nav__links a.is-active { color: var(--text); }
+.nav__links a[aria-current="page"]::after,
+.nav__links a.is-active::after { transform: scaleX(1); box-shadow: 0 0 8px var(--accent-glow); }
+.nav-overlay__links a[aria-current="page"],
+.nav-overlay__links a.is-active {
+  color: var(--accent);
+  text-decoration: underline;          /* non-color cue (the overlay has no ::after underline) - WCAG 1.4.1 */
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+.footer__nav-sec { color: var(--text-3); }
+.footer__nav-sec:hover { color: var(--text-2); }
+
+/* ---- Compact branded subpage header (replaces the 227-frame reel) ---- */
+.subhead {
+  position: relative;
+  padding-top: clamp(8.5rem, 18vh, 12rem);
+  padding-bottom: clamp(2.5rem, 7vh, 5rem);
+  overflow: hidden;
+}
+.subhead__inner { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.1rem; }
+.subhead__title { font-size: clamp(2.4rem, 6.2vw, 4.6rem); line-height: var(--lh-title1); letter-spacing: var(--tr-title1); max-width: 18ch; }
+.subhead__title .wipe-line { display: block; }
+.subhead__standfirst { color: var(--text-2); font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: var(--lh-headline); letter-spacing: var(--tr-headline); max-width: 56ch; }
+.subhead::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 60%;
+  z-index: 0; pointer-events: none;
+  background: radial-gradient(60% 100% at 18% 0%, var(--accent-glow), transparent 60%);
+  opacity: .5;
+}
+
+/* ---- Calm card grid for subpages (NOT the Home pinned reel) ---- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: clamp(1rem, 2.4vw, 1.6rem);
+}
+.cards-grid > li { display: flex; }
+.cards-grid > li > .card { width: 100%; }
+.projects-bucket { padding-block: clamp(2.5rem, 7vh, 5rem); }
+.projects-bucket:first-of-type { padding-top: clamp(1rem, 3vh, 2rem); }
+.bucket__note { color: var(--text-2); margin-top: 1rem; max-width: 52ch; }
+
+/* ---- Ghost / "coming soon" card (textless skeleton; honest placeholder) ---- */
+.card--ghost { border-style: dashed; border-color: var(--hairline-strong); background: transparent; box-shadow: none; opacity: .8; }
+.card--ghost:hover { border-color: var(--accent-glow); box-shadow: none; }
+.card__media--ghost {
+  aspect-ratio: 16 / 10;
+  background:
+    repeating-linear-gradient(135deg, rgba(245,245,242,.03) 0 10px, transparent 10px 20px),
+    linear-gradient(160deg, #131319, #0b0b0e);
+}
+.chip--ghost { color: var(--text-3); border-color: var(--hairline); background: var(--surface); }
+.card__ghost-line {
+  display: block; height: .8rem; border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--surface-2), var(--surface));
+  margin-block: .35rem;
+}
+.card__ghost-line--title { height: 1.4rem; width: 70%; margin-bottom: .6rem; }
+.card__ghost-line--short { width: 45%; }
+.card__status--soon { color: var(--text-3); border-style: dashed; }
+
+/* ---- Empty state (Writing + any "coming soon" room) ---- */
+.writing { padding-block: clamp(2.5rem, 7vh, 5rem); }
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.1rem;
+  max-width: 56ch; margin-inline: auto;
+  padding: clamp(2.6rem, 7vw, 5rem) clamp(1.4rem, 4vw, 3rem);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+.empty-state__mark {
+  display: grid; place-items: center; width: 52px; height: 52px;
+  border-radius: var(--r-pill); color: var(--accent);
+  border: 1px solid var(--accent-glow); background: rgba(201,168,118,.06);
+}
+.empty-state__mark svg { width: 24px; height: 24px; }
+.empty-state__title { font-size: clamp(1.5rem, 3.4vw, 2.2rem); }
+.empty-state__body { color: var(--text-2); font-size: 1.05rem; }
+.empty-state .btn { margin-top: .4rem; }
+.writing__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px,100%),1fr)); gap: clamp(1rem,2.4vw,1.6rem); }
+
+/* ---- Now page ---- */
+.now { padding-block: clamp(2.5rem, 7vh, 5rem); }
+.now__list { display: flex; flex-direction: column; gap: var(--sp-5); max-width: 60ch; border-top: 1px solid var(--separator); padding-top: 2rem; }
+.now__item { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-3); align-items: start; }
+.now__item p { color: var(--text-2); font-size: 1.08rem; }
+.now__item strong { color: var(--text); font-weight: 600; }
+.now__dot { width: 9px; height: 9px; margin-top: .55rem; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.now__item--todo .now__dot { background: var(--text-3); box-shadow: none; }
+.now__placeholder { color: var(--text-3); font-style: italic; }
+.now__tag {
+  display: inline-block; margin-left: .35rem;
+  font-size: .68rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent); padding: .2rem .6rem; border-radius: var(--r-pill);
+  border: 1px solid var(--accent-glow); background: rgba(201,168,118,.06); vertical-align: middle;
+}
+.now__foot { color: var(--text-3); font-size: .92rem; margin-top: 2rem; }
+.now__foot a { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
+.now__foot a:hover { color: var(--accent); }
+
+/* ---- "View all ->" links at Home section ends ---- */
+.view-all {
+  display: inline-flex; align-items: center; gap: .5rem;
+  margin-top: clamp(1.6rem, 3vw, 2.4rem);
+  color: var(--text-2); font-weight: 600; font-size: 1rem;
+  transition: color var(--t-fast) var(--ease), gap var(--t-fast) var(--ease);
+}
+.view-all svg { width: 1rem; height: 1rem; transition: transform var(--t-fast) var(--ease); }
+.view-all:hover { color: var(--accent); gap: .8rem; }
+.view-all:hover svg { transform: translateX(3px); }
+
+/* ---- About-page closing CTA band (light; no second contact orb) ---- */
+.about-cta { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.4rem; padding-block: var(--section); }
+.about-cta h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
+
+/* ---- Contact promoted to a full page hero ---- */
+.contact--page { padding-block: clamp(7rem, 18vh, 12rem) clamp(5rem, 12vh, 8rem); min-height: 70vh; display: flex; align-items: center; }
+.contact--page .eyebrow { margin-bottom: 1.6rem; }
+.contact__social { margin-top: 2.6rem; }
+
+/* ---- Responsive: mirror the existing 980px nav collapse ---- */
+@media (max-width: 980px) {
+  .nav__actions { display: none; }
+}
+@media (max-width: 680px) {
+  .cards-grid, .writing__grid { grid-template-columns: 1fr; }
+  .subhead { padding-top: clamp(6.5rem, 16vh, 9rem); }
+  .subhead__title { font-size: clamp(2.1rem, 9vw, 3rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view-all:hover svg { transform: none; }
+  .now__dot { box-shadow: none; }
+}
+
+/* ============================================================
+   CONTACT FORM (PASS C) — cinematic Liquid-Glass form, Web3Forms.
+   Inherits the pass-A glass language: translucent Snow fill + backdrop
+   blur + lensed gradient ring (::after) + inset rim + soft shadow.
+   transform / opacity / filter only. One accent (gold), lots of calm.
+   ============================================================ */
+.cform { width: min(640px, 100%); margin-inline: auto; margin-top: .4rem; position: relative; text-align: left; }
+
+/* faint gold ambient field behind the panel (atmosphere, clipped, no motion) */
+.cform::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: 44%;
+  width: 118%; aspect-ratio: 1.7 / 1; transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+  filter: blur(90px); opacity: .55; pointer-events: none;
+}
+
+/* glass panel */
+.cform__panel {
+  position: relative;
+  display: flex; flex-direction: column; gap: 1.1rem;
+  border-radius: var(--r-card);
+  padding: clamp(1.4rem, 3.4vw, 2.4rem);
+  background: rgba(245, 245, 242, .05);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+          backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .10), 0 26px 70px -34px rgba(0, 0, 0, .8);
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease);
+}
+/* lensed gradient ring — same mask technique as .card::after */
+.cform__panel::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  border-radius: inherit; padding: 1px;
+  background: linear-gradient(145deg, rgba(245, 245, 242, .24), rgba(245, 245, 242, .05) 38%, rgba(8, 8, 10, .45));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+
+.cform__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+.cform__field { position: relative; }
+
+/* glass inputs */
+.cform__input {
+  width: 100%;
+  font: inherit; font-size: 1rem; line-height: 1.4; color: var(--text);
+  background: rgba(245, 245, 242, .035);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: 1.55rem .95rem .6rem;     /* generous top pad reserves room for the floated label */
+  -webkit-appearance: none; appearance: none;
+  transition: border-color var(--t-std) var(--ease-standard), background var(--t-std) var(--ease-standard),
+              box-shadow var(--t-emph) var(--ease-standard), transform var(--t-std) var(--ease-spring);
+}
+.cform__textarea { min-height: 8.5rem; padding-top: 1.7rem; resize: vertical; line-height: 1.55; }
+.cform__input::placeholder { color: transparent; }
+.cform__input:hover { border-color: var(--hairline-strong); }
+
+/* focus: the field lifts, border draws to gold, a soft glow blooms */
+.cform__field:focus-within .cform__input,
+.cform__input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(245, 245, 242, .06);
+  box-shadow: 0 0 0 1px rgba(201, 168, 118, .35), 0 0 32px -6px var(--accent-glow), var(--inset-hi);
+  transform: translateY(-2px);
+}
+
+/* floating label */
+.cform__label {
+  position: absolute; left: .98rem; top: 1.12rem;
+  color: var(--text-3); font-size: 1rem; pointer-events: none;
+  transform-origin: left top;
+  transition: transform var(--t-std) var(--ease-standard), color var(--t-std) var(--ease-standard);
+}
+.cform__opt { color: var(--text-3); font-weight: 400; font-size: .9em; }
+.cform__field:focus-within .cform__label,
+.cform__input:not(:placeholder-shown) + .cform__label {
+  transform: translateY(-.62rem) scale(.74);
+  color: var(--accent);
+}
+.cform__input:not(:focus):not(:placeholder-shown) + .cform__label { color: var(--text-3); }
+
+/* inline validation */
+.cform__err {
+  color: #e0a892; font-size: .82rem; margin-top: .4rem;
+  opacity: 0; transform: translateY(-2px);
+  transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.cform__field.is-invalid .cform__input { border-color: #c97b63; }
+.cform__field.is-invalid .cform__err { opacity: 1; transform: none; }
+
+/* honeypot: off-screen + unreachable, but NOT display:none */
+.cform__botcheck {
+  position: absolute !important; left: -9999px; top: -9999px;
+  width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+
+.cform__foot { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; margin-top: .35rem; }
+.cform__note { color: var(--text-3); font-size: .86rem; }
+.cform__note.is-error { color: #e0a892; }
+.cform__alt { color: var(--text-3); margin-top: 1.5rem; font-size: .95rem; text-align: center; }
+.cform__alt a { color: var(--text-2); border-bottom: 1px solid var(--hairline-strong); transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease); }
+.cform__alt a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* submit: magnetic gold button + cinematic loading spinner */
+.cform__submit:hover, .cform__submit:focus-visible {
+  box-shadow: 0 0 0 1px rgba(201, 168, 118, .4), 0 18px 60px -12px var(--accent-glow),
+              0 0 40px -6px var(--accent-glow), var(--inset-hi);
+}
+.cform__spinner {
+  position: absolute; inset: 0; margin: auto;
+  width: 1.2rem; height: 1.2rem; border-radius: 50%;
+  border: 2px solid rgba(14, 14, 16, .28); border-top-color: var(--on-accent);
+  opacity: 0; animation: cform-spin .7s linear infinite; animation-play-state: paused;
+}
+.cform.is-sending .cform__submit { pointer-events: none; }
+.cform.is-sending .cform__btn-label,
+.cform.is-sending .cform__submit .btn__icon { opacity: 0; }
+.cform.is-sending .cform__spinner { opacity: 1; animation-play-state: running; }
+@keyframes cform-spin { to { transform: rotate(360deg); } }
+
+/* cinematic success: panel recedes, a glass success card rises with a drawn check */
+.cform__success {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .5rem; text-align: center; padding: 2rem;
+  border-radius: var(--r-card);
+  background: rgba(245, 245, 242, .05);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+          backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--accent-glow);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .12), 0 26px 70px -34px rgba(0, 0, 0, .8), 0 0 50px -12px var(--accent-glow);
+  opacity: 0; visibility: hidden; transform: scale(.98);
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease), visibility 0s linear var(--t-med);
+}
+.cform.is-sent .cform__success {
+  opacity: 1; visibility: visible; transform: none;
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease), visibility 0s;
+}
+.cform.is-sent .cform__panel { opacity: 0; transform: scale(.99); pointer-events: none; }
+.cform__success-title { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+.cform__success-sub { color: var(--text-2); max-width: 30ch; }
+.cform__check { width: 64px; height: 64px; margin-bottom: .4rem; }
+.cform__check svg { width: 100%; height: 100%; }
+.cform__check-c { fill: none; stroke: var(--accent); stroke-width: 2; opacity: .4; }
+.cform__check-p {
+  fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 40; stroke-dashoffset: 40;
+}
+.cform.is-sent .cform__check-p { animation: cform-draw .55s var(--ease) .15s forwards; }
+@keyframes cform-draw { to { stroke-dashoffset: 0; } }
+
+@media (max-width: 560px) {
+  .cform__grid { grid-template-columns: 1fr; }
+}
+
+/* Liquid-Glass form falls back to a solid translucent fill (no blur) on the
+   low-end / static paths, mirroring .card. States stay instant. */
+@media (prefers-reduced-motion: reduce) {
+  .cform__panel, .cform__success {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+    background: rgba(245, 245, 242, .055);
+  }
+  .cform::before { display: none; }
+  .cform__field:focus-within .cform__input, .cform__input:focus-visible { transform: none; }
+  .cform__spinner { animation: none; }
+  .cform.is-sending .cform__btn-label { opacity: 1; }        /* show "Sending…" text instead of a spinner */
+  .cform.is-sending .cform__spinner { display: none; }
+  .cform__check-p { stroke-dashoffset: 0; }                  /* check shown immediately */
+  .cform.is-sent .cform__check-p { animation: none; }
+}
+@media (max-width: 760px) {
+  .cform__panel, .cform__success {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    background: rgba(245, 245, 242, .06);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cform__panel, .cform__success {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+    background: #161618;
+  }
+}
+
+/* ============================================================
+   PROJECTS: case-study CTA + GitHub feed + case pages + demo slots (PASS D).
+   Inherits pass-A glass + pass-B voice. transform/opacity/filter only.
+   ============================================================ */
+
+/* ---- "Case study" link on each project card ---- */
+.card__cta {
+  margin-top: .9rem; align-self: flex-start;
+  display: inline-flex; align-items: center; gap: .4rem;
+  font-size: .9rem; font-weight: 600; color: var(--accent);
+  transition: gap var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.card__cta svg { width: 1rem; height: 1rem; transition: transform var(--t-fast) var(--ease); }
+.card:hover .card__cta { gap: .55rem; }
+.card:hover .card__cta svg { transform: translateX(3px); }
+
+/* ---- "From the workshop" GitHub feed ---- */
+.workshop .bucket__note code {
+  font-family: var(--font-mono);
+  font-size: .85em; color: var(--accent);
+  padding: .08em .4em; border-radius: 6px;
+  background: rgba(201, 168, 118, .08); border: 1px solid var(--accent-glow);
+}
+/* repo cards reuse .card glass; they have no media, just a body + foot */
+.repo-card { animation: repo-in .6s var(--ease) both; animation-delay: calc(var(--i, 0) * .06s); }
+.repo-card .card__body { gap: .6rem; }
+.repo-card__stars { color: var(--accent); font-size: .82rem; font-variant-numeric: tabular-nums; }
+.repo-card__foot {
+  margin-top: auto; padding-top: .9rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  font-size: .82rem; color: var(--text-3);
+  border-top: 1px solid var(--hairline);
+}
+.repo-card__links a { color: var(--text-2); transition: color var(--t-fast) var(--ease); }
+.repo-card__links a:hover { color: var(--accent); }
+@keyframes repo-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* ---- Case study page ---- */
+.case__head .subhead__inner { display: flex; flex-direction: column; align-items: flex-start; }
+.case__back {
+  display: inline-flex; align-items: center; gap: .45rem;
+  color: var(--text-3); font-size: .92rem; margin-bottom: 1.3rem;
+  transition: gap var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.case__back svg { width: 1.05rem; height: 1.05rem; transition: transform var(--t-fast) var(--ease); }
+.case__back:hover { color: var(--accent); gap: .65rem; }
+.case__back:hover svg { transform: translateX(-3px); }
+.case__status { margin: 0 0 1rem; }
+.case__body { padding-bottom: clamp(4rem, 10vh, 7rem); }
+.case__grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.6rem, 4vw, 3rem);
+  margin-bottom: clamp(3rem, 7vh, 5rem);
+}
+.case__h {
+  font-size: .78rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: .8rem;
+}
+.case__block p { color: var(--text-2); line-height: var(--lh-body); }
+.case__block--real .case__real { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
+.case__real li {
+  position: relative; padding-left: 1.5rem; color: var(--text); line-height: var(--lh-callout); font-size: var(--fs-callout);
+}
+.case__real li::before {
+  content: ""; position: absolute; left: 0; top: .55em;
+  width: .5rem; height: .5rem; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 10px -1px var(--accent-glow);
+}
+.case__section { margin-bottom: clamp(2.4rem, 6vh, 4rem); }
+.case__h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); line-height: var(--lh-title3); letter-spacing: var(--tr-title3); margin-bottom: 1.1rem; }
+.case__foot {
+  margin-top: clamp(2rem, 5vh, 3.5rem); padding-top: clamp(2rem, 5vh, 3rem);
+  border-top: 1px solid var(--hairline);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1.2rem;
+}
+.case__foot-q { color: var(--text-2); font-size: 1.1rem; }
+
+/* ---- Honest media + demo slots (glass) ---- */
+.media-slot, .demo {
+  position: relative; border-radius: var(--r-card); overflow: hidden;
+  background: rgba(245, 245, 242, .04);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+          backdrop-filter: blur(24px) saturate(170%);
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 0 rgba(245, 245, 242, .08), 0 20px 60px -34px rgba(0, 0, 0, .7);
+  min-height: 320px; display: grid; place-items: center;
+}
+.demo--feature { min-height: 460px; }
+.media-slot__placeholder, .demo__placeholder {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: .55rem; padding: clamp(2rem, 5vw, 3.5rem); max-width: 46ch;
+}
+.media-slot__icon { color: var(--text-3); }
+.media-slot__icon svg { width: 3rem; height: 3rem; }
+.media-slot__title, .demo__title { font-weight: 700; color: var(--text); font-size: 1.1rem; }
+.media-slot__sub, .demo__sub { color: var(--text-3); font-size: .92rem; line-height: 1.5; }
+/* demo "in progress" pulse dot */
+.demo__dot {
+  width: .7rem; height: .7rem; border-radius: 50%; margin-bottom: .3rem;
+  background: var(--accent); box-shadow: 0 0 0 0 rgba(201, 168, 118, .5);
+  animation: demo-pulse 2.4s var(--ease) infinite;
+}
+@keyframes demo-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(201, 168, 118, .45); }
+  70% { box-shadow: 0 0 0 14px rgba(201, 168, 118, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 168, 118, 0); }
+}
+/* live state: the iframe fills the slot */
+.demo.is-live { display: block; min-height: 0; }
+.demo__frame { width: 100%; height: clamp(420px, 72vh, 820px); border: 0; display: block; background: var(--bg); }
+.demo--feature.is-live .demo__frame, .demo--feature .demo__frame { height: clamp(520px, 80vh, 900px); }
+
+@media (max-width: 860px) {
+  .case__grid { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+/* low-end / static paths: solid fill, no blur, no pulse (mirrors .card) */
+@media (prefers-reduced-motion: reduce) {
+  .media-slot, .demo { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(245, 245, 242, .045); }
+  .repo-card { animation: none; }
+  .demo__dot { animation: none; }
+}
+@media (max-width: 760px) {
+  .media-slot, .demo { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(245, 245, 242, .05); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .media-slot, .demo { -webkit-backdrop-filter: none; backdrop-filter: none; background: #161618; }
+}
+
+/* ============================================================
+   TAHOE ELASTICITY — Apple "Liquid" responsiveness on glass cards.
+   Subtle spring lift on hover, press-in on :active. Fine-pointer ONLY and
+   only when motion is allowed (so reduced-motion users get no springs).
+   Opacity stays on the slow reveal curve so card fade-ins are unaffected;
+   only `transform` springs. #work .card is EXCLUDED — workTick writes its
+   transform every frame, and a transform transition there would fight the
+   rAF scrub and break 120fps. .patent is intentionally NOT included
+   (choreoTick drives its transform during the Patents reveal/scan).
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  /* The lift uses the INDIVIDUAL translate/scale properties (not the `transform` shorthand) so it
+     composes with — and never clobbers — the [data-reveal] reveal, which animates `transform`.
+     This transition REPLICATES the [data-reveal] longhands verbatim (opacity/transform/filter at
+     --t-slow/--ease with the var(--d) stagger) so the blur-clear, stagger, and synced fade survive,
+     then adds translate/scale spring (hover lift) + border/shadow (hover warm). */
+  .card {
+    transition: opacity var(--t-slow) var(--ease) var(--d, 0s),
+                transform var(--t-slow) var(--ease) var(--d, 0s),
+                filter var(--t-slow) var(--ease) var(--d, 0s),
+                translate var(--t-std) var(--ease-spring),
+                scale var(--t-std) var(--ease-spring),
+                border-color var(--t-med) var(--ease),
+                box-shadow var(--t-med) var(--ease);
+  }
+  .card:hover { translate: 0 -2px; scale: 1.006; }
+  .card:active { translate: 0 0; scale: .997; transition-duration: var(--t-micro); }
+  /* Work-gallery cards scrub via per-frame inline `transform` — keep them off CSS transitions (perf) */
+  #work .card { transition: none; }
+  #work .card:hover, #work .card:active { translate: none; scale: none; }
 }
