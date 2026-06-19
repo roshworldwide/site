@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Writing - Roshan Raj · Notes from the last mile</title>
+  <meta name="description" content="Notes by Roshan Raj on building where the internet can't reach: air-gapped AI, on-device inference, and the last mile from prototype to production. First essays coming soon." />
+
+  <meta name="theme-color" content="#0E0E10" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="canonical" href="https://roshworldwide.com/writing" />
+
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/icons/favicon.ico" sizes="32x32" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Roshan Raj" />
+  <meta property="og:url" content="https://roshworldwide.com/writing" />
+  <meta property="og:title" content="Writing - Roshan Raj" />
+  <meta property="og:description" content="Field notes on air-gapped AI, on-device inference, and the last mile from prototype to production. First essays coming soon." />
+  <meta property="og:image" content="https://roshworldwide.com/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="roshworldwide - Systems & ML Engineer, Inventor, 7 patents filed" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Writing - Roshan Raj" />
+  <meta name="twitter:description" content="Field notes on air-gapped AI, on-device inference, and the last mile from prototype to production. First essays coming soon." />
+  <meta name="twitter:image" content="https://roshworldwide.com/assets/og.png" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#top">Skip to content</a>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="aurora" aria-hidden="true">
+    <span class="orb orb--a"></span>
+    <span class="orb orb--b"></span>
+  </div>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav-shell">
+    <nav class="nav" aria-label="Primary">
+      <a class="nav__brand" href="index.html" data-magnetic aria-label="RoSh, home">
+        <span class="nav__mark" aria-hidden="true">R</span>
+        <span class="nav__name">RoSh</span>
+      </a>
+
+      <ul class="nav__links" id="nav-links">
+        <li><a href="projects.html">Work</a></li>
+        <li><a href="patents.html">Patents</a></li>
+        <li><a href="writing.html" aria-current="page" class="is-active">Writing</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <a class="btn btn--primary nav__cta" href="contact.html" data-magnetic>
+          <span>Let's talk</span>
+          <span class="btn__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </span>
+        </a>
+      </div>
+
+      <button class="nav__burger" id="nav-burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav-overlay">
+        <span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Mobile full-screen menu -->
+  <div class="nav-overlay" id="nav-overlay" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" tabindex="-1">
+    <ul class="nav-overlay__links">
+      <li style="--i:0"><a href="projects.html" data-overlay-link>Work</a></li>
+      <li style="--i:1"><a href="patents.html" data-overlay-link>Patents</a></li>
+      <li style="--i:2"><a href="writing.html" data-overlay-link aria-current="page" class="is-active">Writing</a></li>
+      <li style="--i:3"><a href="about.html" data-overlay-link>About</a></li>
+      <li style="--i:4"><a href="now.html" data-overlay-link>Now</a></li>
+      <li style="--i:5"><a href="contact.html" data-overlay-link>Let's talk</a></li>
+    </ul>
+    <div class="nav-overlay__foot">
+      <a href="mailto:roshan@roshworldwide.com">roshan@roshworldwide.com</a>
+    </div>
+  </div>
+
+  <main id="top" tabindex="-1">
+    <header class="subhead" aria-labelledby="page-title">
+      <div class="shell subhead__inner">
+        <p class="eyebrow" data-reveal>Writing</p>
+        <h1 class="subhead__title display reveal-wipe" id="page-title" data-reveal>
+          <span class="wipe-line">Notes on building where the</span>
+          <span class="wipe-line accent-em" data-reveal style="--d:.10s">internet can't reach.</span>
+        </h1>
+        <p class="subhead__standfirst" data-reveal style="--d:.14s">Field notes on air-gapped AI, on-device inference, and the last mile from prototype to production. Coming soon — I've been busy shipping.</p>
+      </div>
+    </header>
+
+    <section class="writing shell" aria-labelledby="writing-list-title">
+      <h2 class="visually-hidden" id="writing-list-title">Essays</h2>
+
+      <!-- HONEST EMPTY STATE: no fabricated posts. -->
+      <div class="empty-state" data-reveal>
+        <span class="empty-state__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        </span>
+        <p class="empty-state__title display">Nothing here yet.</p>
+        <p class="empty-state__body">I've been busy shipping. Essays are coming — on systems, ML, and building where there's no signal to fall back on.</p>
+        <a class="btn btn--ghost" href="mailto:roshan@roshworldwide.com?subject=Notify%20me%20when%20RoSh%20writing%20goes%20live" data-magnetic>
+          <span>Email me when it's live</span>
+        </a>
+      </div>
+
+      <!-- Article-card grid STRUCTURE, authored and ready for real posts. It renders NOTHING until the
+           owner uncomments one <li><article class="card"> per REAL published post. No fabricated entries.
+      <ul class="writing__grid">
+        <li><article class="card"><a class="card__inner" href="POST_SLUG.html">
+          <div class="card__body">
+            <div class="card__meta"><span class="chip">TOPIC</span><span class="card__year">YYYY</span></div>
+            <h3 class="card__title">REAL TITLE</h3>
+            <p class="card__desc">REAL ONE-LINE EXCERPT.</p>
+            <span class="card__status card__status--dev">Read</span>
+          </div>
+        </a></article></li>
+      </ul>
+      -->
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer shell">
+    <div class="footer__top">
+      <a class="footer__brand" href="index.html">
+        <span class="nav__mark" aria-hidden="true">R</span>
+        RoSh
+      </a>
+      <nav class="footer__nav" aria-label="Footer">
+        <a href="projects.html">Work</a>
+        <a href="patents.html">Patents</a>
+        <a href="writing.html">Writing</a>
+        <a href="about.html">About</a>
+        <a href="now.html" class="footer__nav-sec">Now</a>
+        <a href="contact.html">Contact</a>
+        <a href="mailto:roshan@roshworldwide.com">Email</a>
+      </nav>
+      <ul class="footer__social">
+        <li><a href="https://github.com/roshworldwide" aria-label="GitHub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a></li>
+        <li><a href="https://linkedin.com/in/roshworldwide" aria-label="LinkedIn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg></a></li>
+        <li><a href="https://x.com/roshworldwide" aria-label="X" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a></li>
+        <li><a href="https://instagram.com/roshworldwide" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163C8.741 0 8.332.014 7.052.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a></li>
+        <li><a href="https://youtube.com/@roshworldwide" aria-label="YouTube" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a></li>
+      </ul>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; <span id="year">2026</span> Roshan Raj. Engineered by RoSh.</p>
+      <a href="#top" class="footer__totop">Back to top
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+      </a>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
