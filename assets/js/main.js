@@ -773,62 +773,496 @@
 })();
 
 /* ============================================================
-   PROJECT DEMO SLOTS (PASS D) — honest, lazy live-demo embeds.
-   Each case study has <div class="demo" data-demo="<slug>">. While a
-   project's demo URL is empty, the slot shows an honest "in progress"
-   state and NO iframe is created. The moment a real hosted URL is set
-   below, that slot lazy-loads the demo into an <iframe> on scroll —
-   recruiters get the real thing, never a mock.
-
-   ╔══════════════════════════════════════════════════════════════╗
-   ║  OWNER — TO MAKE A DEMO GO LIVE: set its hosted URL as the     ║
-   ║  value for its slug below (the ONE line you edit), e.g.        ║
-   ║      "llm-eval": "https://eval.roshworldwide.com",            ║
-   ║  Leave it "" to keep the honest "in progress" state.          ║
-   ╚══════════════════════════════════════════════════════════════╝ */
+   PASS F + G — ⌘K command palette + self-hosted booking calendar.
+   Self-contained; injects its own DOM on every page (no per-page markup).
+   Native to the stack: Tahoe glass, SF Pro, gold accent, --ease-* tokens,
+   zero front-end deps. The booking calendar talks to our own Vercel
+   serverless API (/api/*) — no third-party booking SaaS. Email is always
+   offered as the no-friction alternative. Degrades to email-only when the
+   backend isn't live yet.
+   ============================================================ */
 (() => {
   "use strict";
-  const slots = document.querySelectorAll("[data-demo]");
-  if (!slots.length) return;
 
-  const PROJECT_DEMOS = {
-    "llm-eval":     "",   // flagship playground — paste its hosted URL here to go live
-    "acoustic-ams": "",
-    "sre-engine":   "",
-    "finance-os":   "",
-    "quant-signal": "",
+  const EMAIL = "roshan@roshworldwide.com";
+  const isMac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || "");
+  const enc = encodeURIComponent;
+  const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const el = (tag, attrs) => { const n = document.createElement(tag); if (attrs) for (const k in attrs) { if (k === "class") n.className = attrs[k]; else if (attrs[k] != null) n.setAttribute(k, attrs[k]); } return n; };
+  const visTz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (_) { return "UTC"; } })();
+
+  // single owner of scroll-lock + background `inert` for the palette + booking dialogs.
+  // (The mobile menu manages its own overflow in the other IIFE; the open-guards ensure a modal
+  //  and the menu can never be open at once, so they never fight over the lock.)
+  function setBodyLock() {
+    const cm = document.getElementById("cmdk"), bkEl = document.getElementById("bk");
+    const modal = (cm && !cm.hidden) || (bkEl && !bkEl.hidden);
+    document.body.style.overflow = (modal || document.body.classList.contains("menu-open")) ? "hidden" : "";
+    // WAI-ARIA dialog isolation: take the page behind the dialog out of AT + tab order while open.
+    [document.getElementById("top"), document.querySelector(".nav-shell"), document.querySelector("footer.footer")].forEach((n) => {
+      if (n) modal ? n.setAttribute("inert", "") : n.removeAttribute("inert");
+    });
+  }
+  function trap(container, e) {
+    if (e.key !== "Tab") return;
+    const f = Array.prototype.filter.call(container.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea, [tabindex]:not([tabindex="-1"])'), (x) => !x.hidden && x.offsetParent !== null && !x.closest("[hidden]"));
+    if (!f.length) { e.preventDefault(); return; }
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  const demoMailto = (project) => "mailto:" + EMAIL + "?subject=" + enc(project ? "Demo request: " + project : "Demo request") + "&body=" + enc(project ? "Hi Roshan, I'd love a live walkthrough of " + project + "." : "Hi Roshan, I'd love a live walkthrough.");
+
+  /* ============================================================
+     BOOKING CALENDAR — custom UI over our own /api (no SaaS)
+     ============================================================ */
+  const ICON = {
+    cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
+    prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
+    next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   };
 
-  const activate = (box, url) => {
-    if (box.dataset.loaded) return;
-    box.dataset.loaded = "1";
-    const frame = document.createElement("iframe");
-    frame.className = "demo__frame";
-    frame.src = url;
-    frame.title = box.dataset.demoTitle || "Live demo";
-    frame.loading = "lazy";
-    frame.referrerPolicy = "no-referrer";
-    frame.setAttribute("allow", "fullscreen");
-    frame.setAttribute("allowfullscreen", "");
-    const ph = box.querySelector(".demo__placeholder");
-    if (ph) ph.remove();
-    box.classList.add("is-live");
-    box.appendChild(frame);
-  };
+  const bk = el("div", { class: "bk", id: "bk", role: "dialog", "aria-modal": "true", "aria-labelledby": "bk-title", hidden: "" });
+  bk.innerHTML =
+    '<div class="bk__scrim" data-bk-close></div>' +
+    '<div class="bk__panel" role="document">' +
+      '<header class="bk__head">' +
+        '<button class="bk__back" type="button" data-bk-back hidden aria-label="Back">' + ICON.back + '</button>' +
+        '<h2 class="bk__title display" id="bk-title">Book a live demo</h2>' +
+        '<button class="bk__close" type="button" data-bk-close aria-label="Close">' + ICON.x + '</button>' +
+      '</header>' +
+      '<p class="bk__step" id="bk-step" aria-live="polite"></p>' +
+      '<div class="bk__body" id="bk-body"></div>' +
+      '<p class="bk__foot">Prefer email? <a id="bk-email" href="' + demoMailto(null) + '">' + EMAIL + '</a></p>' +
+    '</div>';
+  document.body.appendChild(bk);
+  const bkPanel = bk.querySelector(".bk__panel");
+  const bkBody = bk.querySelector("#bk-body");
+  const bkStep = bk.querySelector("#bk-step");
+  const bkBack = bk.querySelector("[data-bk-back]");
+  const bkEmail = bk.querySelector("#bk-email");
+  const bkTitle = bk.querySelector("#bk-title");
 
-  slots.forEach((box) => {
-    const slug = box.dataset.demo;
-    const url = (box.dataset.demoUrl || PROJECT_DEMOS[slug] || "").trim();
-    if (!url) return; // honest placeholder stays; no iframe is ever created
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver((entries, obs) => {
-        entries.forEach((e) => { if (e.isIntersecting) { activate(box, url); obs.disconnect(); } });
-      }, { rootMargin: "300px" });
-      io.observe(box);
-    } else {
-      activate(box, url);
+  const state = { project: null, cfg: null, date: null, slot: null, view: null, cursor: null, returnEl: null, step: "loading" };
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const pad = (n) => String(n).padStart(2, "0");
+  const ymd = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+
+  function setStep(msg) { if (bkStep) bkStep.textContent = msg || ""; }
+
+  function openBooking(project) {
+    state.project = project || null;
+    state.returnEl = document.activeElement;
+    bkTitle.textContent = "Book a live demo";
+    bkEmail.href = demoMailto(state.project);
+    bkBack.hidden = true;
+    bk.hidden = false; void bk.offsetHeight; bk.classList.add("is-open");
+    setBodyLock();
+    renderLoading();
+    // config drives the calendar + decides calendar-vs-email-only
+    fetch("/api/config", { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((cfg) => { state.cfg = cfg; cfg && cfg.live ? showCalendar() : showUnavailable(); })
+      .catch(() => showUnavailable());
+    (bkPanel.querySelector(".bk__close") || bkPanel).focus();
+  }
+  function closeBooking() {
+    if (bk.hidden) return;
+    bk.classList.remove("is-open"); bk.hidden = true;
+    setBodyLock();
+    if (state.returnEl && state.returnEl.focus) state.returnEl.focus();
+  }
+  bk.addEventListener("click", (e) => { if (e.target.closest("[data-bk-close]")) closeBooking(); });
+  bk.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); closeBooking(); } else trap(bkPanel, e); });
+  bkBack.addEventListener("click", () => { if (state.step === "slots") showCalendar(); else if (state.step === "details") showSlots(state.date); });
+
+  function renderLoading() { state.step = "loading"; setStep("Loading availability…"); bkBody.innerHTML = '<div class="bk-load"><span class="bk-spinner" aria-hidden="true"></span></div>'; }
+
+  function showUnavailable() {
+    state.step = "email";
+    setStep("");
+    bkBack.hidden = true;
+    bkBody.innerHTML =
+      '<div class="bk-msg">' +
+        '<p class="bk-msg__lead">Live booking is being set up. The fastest way to grab a slot right now is email — it lands straight in my inbox and I\'ll send times back the same day.</p>' +
+        '<a class="btn btn--primary btn--lg" href="' + demoMailto(state.project) + '"><span>Email me</span><span class="btn__icon" aria-hidden="true">' + ICON.mail + '</span></a>' +
+      '</div>';
+    const a = bkBody.querySelector("a.btn"); if (a) a.focus();
+  }
+
+  /* ---- Step 1: calendar ---- */
+  function showCalendar() {
+    state.step = "calendar";
+    bkBack.hidden = true;
+    setStep(state.project ? "Pick a day for your " + state.project + " demo." : "Pick a day.");
+    const base = state.date ? new Date(state.date + "T00:00:00") : today0();
+    state.view = { y: base.getFullYear(), m: base.getMonth() };
+    state.cursor = state.date ? new Date(state.date + "T00:00:00") : today0();
+    bkBody.innerHTML = '<div class="bk-cal">' +
+      '<div class="bk-cal__head">' +
+        '<button class="bk-cal__nav" type="button" data-cal-prev aria-label="Previous month">' + ICON.prev + '</button>' +
+        '<span class="bk-cal__label" id="bk-cal-label"></span>' +
+        '<button class="bk-cal__nav" type="button" data-cal-next aria-label="Next month">' + ICON.next + '</button>' +
+      '</div>' +
+      '<table class="bk-cal__grid" role="grid" aria-labelledby="bk-cal-label">' +
+        '<thead><tr>' + DOW.map((d) => '<th scope="col" abbr="' + d + '"><span aria-hidden="true">' + d[0] + '</span><span class="visually-hidden">' + d + '</span></th>').join("") + '</tr></thead>' +
+        '<tbody id="bk-cal-body"></tbody>' +
+      '</table></div>';
+    bkBody.querySelector("[data-cal-prev]").addEventListener("click", () => shiftMonth(-1));
+    bkBody.querySelector("[data-cal-next]").addEventListener("click", () => shiftMonth(1));
+    renderCalendar();
+    const d0 = bkBody.querySelector('.bk-day[tabindex="0"]'); if (d0) d0.focus(); // land focus on the actionable day
+  }
+  function shiftMonth(n) { let m = state.view.m + n, y = state.view.y; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } state.view = { y, m }; renderCalendar(); }
+
+  function dayDisabled(d) {
+    const cfg = state.cfg;
+    const t0 = today0();
+    if (d < t0) return true;                                            // past
+    const max = addDays(t0, (cfg.maxDaysAhead || 30));
+    if (d > max) return true;                                           // beyond window
+    if (!cfg.workingDays.includes(d.getDay())) return true;            // non-working day
+    if ((cfg.blockedDates || []).includes(ymd(d))) return true;        // blocked
+    return false;
+  }
+  function renderCalendar() {
+    const { y, m } = state.view;
+    const label = bkBody.querySelector("#bk-cal-label"); if (label) label.textContent = MONTHS[m] + " " + y;
+    const body = bkBody.querySelector("#bk-cal-body"); if (!body) return;
+    const first = new Date(y, m, 1);
+    const startDow = first.getDay();
+    const daysIn = new Date(y, m + 1, 0).getDate();
+    // ensure cursor sits in this view (clamp to a valid in-month day for roving focus)
+    if (state.cursor.getFullYear() !== y || state.cursor.getMonth() !== m) state.cursor = new Date(y, m, 1);
+    let html = "", day = 1 - startDow;
+    for (let w = 0; w < 6; w++) {
+      if (day > daysIn) break;
+      html += "<tr>";
+      for (let c = 0; c < 7; c++, day++) {
+        if (day < 1 || day > daysIn) { html += '<td class="bk-cal__pad" aria-hidden="true"></td>'; continue; }
+        const d = new Date(y, m, day);
+        const ds = ymd(d), dis = dayDisabled(d), sel = state.date === ds, isToday = ymd(today0()) === ds;
+        const isCursor = state.cursor.getDate() === day && !dis;
+        const cls = "bk-day" + (sel ? " is-selected" : "") + (isToday ? " is-today" : "");
+        html += '<td role="gridcell"' + (sel ? ' aria-selected="true"' : "") + '>' +
+          '<button type="button" class="' + cls + '" data-date="' + ds + '"' +
+          (dis ? ' aria-disabled="true" tabindex="-1"' : ' tabindex="' + (isCursor ? "0" : "-1") + '"') +
+          ' aria-label="' + d.toDateString() + (sel ? ", selected" : "") + (dis ? ", unavailable" : "") + '">' + day + "</button></td>";
+      }
+      html += "</tr>";
     }
+    body.innerHTML = html;
+    // make sure exactly one focusable day exists
+    if (!body.querySelector('.bk-day[tabindex="0"]')) { const f = body.querySelector(".bk-day:not([aria-disabled])"); if (f) f.tabIndex = 0; }
+    body.querySelectorAll(".bk-day").forEach((btn) => {
+      btn.addEventListener("click", () => { if (btn.getAttribute("aria-disabled") !== "true") selectDate(btn.dataset.date); });
+    });
+    body.onkeydown = calKeydown;
+  }
+  function calKeydown(e) {
+    const keys = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    if (e.key in keys) { e.preventDefault(); moveCursor(addDays(state.cursor, keys[e.key])); }
+    else if (e.key === "Home") { e.preventDefault(); moveCursor(addDays(state.cursor, -state.cursor.getDay())); }
+    else if (e.key === "End") { e.preventDefault(); moveCursor(addDays(state.cursor, 6 - state.cursor.getDay())); }
+    else if (e.key === "PageUp") { e.preventDefault(); moveCursor(new Date(state.cursor.getFullYear(), state.cursor.getMonth() - 1, state.cursor.getDate())); }
+    else if (e.key === "PageDown") { e.preventDefault(); moveCursor(new Date(state.cursor.getFullYear(), state.cursor.getMonth() + 1, state.cursor.getDate())); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); const ds = ymd(state.cursor); if (!dayDisabled(state.cursor)) selectDate(ds); }
+  }
+  function moveCursor(d) {
+    state.cursor = d;
+    if (d.getFullYear() !== state.view.y || d.getMonth() !== state.view.m) { state.view = { y: d.getFullYear(), m: d.getMonth() }; renderCalendar(); }
+    const btn = bkBody.querySelector('.bk-day[data-date="' + ymd(d) + '"]');
+    bkBody.querySelectorAll(".bk-day").forEach((b) => { b.tabIndex = -1; });
+    if (btn && btn.getAttribute("aria-disabled") !== "true") { btn.tabIndex = 0; btn.focus(); }
+    else if (btn) { btn.tabIndex = 0; btn.focus(); } // allow focusing disabled days (APG); just can't select
+  }
+
+  /* ---- Step 2: slots ---- */
+  function selectDate(ds) { state.date = ds; showSlots(ds); }
+  function showSlots(ds) {
+    state.step = "slots"; state.slot = null;
+    bkBack.hidden = false;
+    const human = new Date(ds + "T00:00:00").toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    setStep("Times on " + human + ". Pick one.");
+    bkBody.innerHTML = '<div class="bk-slots"><div class="bk-load"><span class="bk-spinner" aria-hidden="true"></span></div></div>';
+    const wrap = bkBody.querySelector(".bk-slots");
+    fetch("/api/availability?date=" + enc(ds) + "&tz=" + enc(visTz), { headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data) => {
+        const slots = (data && data.slots) || [];
+        if (!slots.length) {
+          wrap.innerHTML = '<p class="bk-slots__empty">No times left that day — try another.</p><button class="btn btn--ghost" type="button" data-bk-back><span>Pick another day</span></button>';
+          wrap.querySelector("[data-bk-back]").addEventListener("click", showCalendar);
+          setStep("No times left on " + human + ". Try another day.");
+          return;
+        }
+        wrap.innerHTML = '<div class="bk-slots__grid">' + slots.map((s) =>
+          '<button type="button" class="bk-slot" data-start="' + esc(s.start) + '">' + esc(s.time) + "</button>").join("") + "</div>";
+        wrap.querySelectorAll(".bk-slot").forEach((b) => b.addEventListener("click", () => selectSlot(b.dataset.start, b.textContent)));
+        setStep(slots.length + " time" + (slots.length > 1 ? "s" : "") + " open on " + human + ".");
+        const f = wrap.querySelector(".bk-slot"); if (f) f.focus();
+      })
+      .catch(() => {
+        wrap.innerHTML = '<p class="bk-slots__empty">Could not load times right now. Email me and I\'ll send some.</p><a class="btn btn--ghost" href="' + demoMailto(state.project) + '"><span>Email instead</span></a>';
+        setStep("Could not load times.");
+      });
+  }
+
+  /* ---- Step 3: details ---- */
+  function selectSlot(start, timeText) {
+    state.slot = start; state.step = "details"; bkBack.hidden = false;
+    const human = new Date(start).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    setStep("Almost there — your details for " + human + " at " + timeText + ".");
+    bkBody.innerHTML =
+      '<form class="bk-form" novalidate>' +
+        '<p class="bk-form__when"><strong>' + esc(human) + "</strong> · " + esc(timeText) + ' <span>(' + esc(visTz.replace(/_/g, " ")) + ")</span></p>" +
+        '<input type="checkbox" name="botcheck" class="cform__botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" />' +
+        field("bk-name", "name", "text", "Name", "name", true) +
+        field("bk-email", "email", "email", "Email", "email", true) +
+        field("bk-project", "project", "text", "Which project?", "off", false, state.project || "") +
+        '<div class="cform__field"><textarea class="cform__input cform__textarea" id="bk-message" name="message" placeholder=" " rows="3"></textarea><label class="cform__label" for="bk-message">Anything I should know? <span class="cform__opt">— optional</span></label></div>' +
+        '<p class="bk-form__err" id="bk-form-err" role="alert"></p>' +
+        '<button class="btn btn--primary btn--lg" type="submit"><span class="bk-form__label">Confirm booking</span><span class="btn__icon" aria-hidden="true">' + ICON.cal + '</span><span class="bk-spinner bk-spinner--btn" aria-hidden="true"></span></button>' +
+        '<p class="bk-form__consent">By booking you agree I\'ll email you a calendar invite for this time. No spam, ever.</p>' +
+      "</form>";
+    const form = bkBody.querySelector(".bk-form");
+    form.addEventListener("submit", submitBooking);
+    const fn = form.querySelector("#bk-name"); if (fn) fn.focus();
+  }
+  function field(id, name, type, label, ac, required, val) {
+    return '<div class="cform__field"><input class="cform__input" id="' + id + '" name="' + name + '" type="' + type + '" placeholder=" " autocomplete="' + ac + '"' + (required ? " required" : "") + (val ? ' value="' + esc(val) + '"' : "") + ' /><label class="cform__label" for="' + id + '">' + label + (required ? "" : ' <span class="cform__opt">— optional</span>') + "</label></div>";
+  }
+
+  /* ---- Step 4: confirm (POST /api/book) ---- */
+  async function submitBooking(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const errEl = form.querySelector("#bk-form-err");
+    const name = form.name.value.trim(), email = form.email.value.trim();
+    const project = form.project.value.trim(), message = form.message.value.trim();
+    const botcheck = form.botcheck.checked;
+    errEl.textContent = "";
+    [form.name, form.email].forEach((i) => { i.removeAttribute("aria-invalid"); i.closest(".cform__field").classList.remove("is-invalid"); });
+    const bad = (inp, msg) => { errEl.textContent = msg; inp.setAttribute("aria-invalid", "true"); inp.closest(".cform__field").classList.add("is-invalid"); inp.focus(); };
+    if (!name) return bad(form.name, "Your name, please.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return bad(form.email, "A valid email so I can send the invite.");
+    form.classList.add("is-sending");
+    const btn = form.querySelector('button[type="submit"]'); btn.disabled = true;
+    let res, data;
+    try {
+      res = await fetch("/api/book", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ date: state.date, slot: state.slot, name, email, project, message, botcheck, tz: visTz }) });
+      data = await res.json().catch(() => ({}));
+    } catch (_) {
+      form.classList.remove("is-sending"); btn.disabled = false;
+      errEl.textContent = "Network hiccup — try again, or email me directly.";
+      return;
+    }
+    form.classList.remove("is-sending"); btn.disabled = false;
+    if (res.ok && data && data.ok) { showDone(data); return; }
+    if (res.status === 409) { // slot taken/unavailable — refresh times honestly
+      errEl.textContent = "That time was just taken — here are the current openings.";
+      setStep("That slot was just taken. Pick another.");
+      setTimeout(() => showSlots(state.date), 700);
+      return;
+    }
+    errEl.textContent = (data && errorCopy[data.error]) || "Something went wrong. Try again, or email me directly.";
+  }
+  const errorCopy = { bad_email: "That email looks off.", name_required: "Your name, please.", rate_limited: "Too many tries — give it a minute, or email me.", not_configured: "Booking isn't live yet — email me and I'll sort a time." };
+
+  function showDone(data) {
+    state.step = "done"; bkBack.hidden = true; bkTitle.textContent = "You're booked";
+    setStep("");
+    bkBody.innerHTML =
+      '<div class="bk-done">' +
+        '<span class="bk-done__check" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="bk-check-c" cx="26" cy="26" r="23"/><path class="bk-check-p" d="M15 27l7.5 7.5L37 19"/></svg></span>' +
+        '<p class="bk-done__title display">You\'re booked.</p>' +
+        '<p class="bk-done__when">' + esc(data.label || "") + "</p>" +
+        '<p class="bk-done__sub">' + (data.mailed ? "Check your email — the calendar invite is attached." : "Add the invite below — that\'s your confirmation. (The email didn\'t go through this time; I\'ll still see the booking.)") + "</p>" +
+        '<div class="bk-done__actions">' +
+          '<button class="btn btn--primary" type="button" id="bk-ics"><span>Add to calendar</span></button>' +
+          '<button class="btn btn--ghost" type="button" data-bk-close><span>Done</span></button>' +
+        "</div>" +
+      "</div>";
+    const icsBtn = bkBody.querySelector("#bk-ics");
+    if (data.ics) icsBtn.addEventListener("click", () => downloadIcs(data.ics));
+    else icsBtn.hidden = true;
+    setStep("Booked for " + (data.label || "") + ". Invite ready.");
+    icsBtn && !icsBtn.hidden ? icsBtn.focus() : (bkBody.querySelector("[data-bk-close]") || bkPanel).focus();
+  }
+  function downloadIcs(ics) {
+    try {
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = el("a"); a.href = url; a.download = "demo-with-roshan.ics"; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (_) {}
+  }
+
+  // any "Request a live demo" / data-book CTA opens the booking calendar (href is the no-JS mailto fallback)
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-book]"); if (b) { e.preventDefault(); openBooking(b.getAttribute("data-project") || null); } });
+
+  /* ============================================================
+     ⌘K COMMAND PALETTE (Pass F + review fixes)
+     ============================================================ */
+  function copyEmail() {
+    const ok = () => announce("Email address copied");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(EMAIL).then(ok).catch(fallback);
+    else fallback();
+    function fallback() { const ta = el("textarea"); ta.value = EMAIL; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.focus(); ta.select(); try { document.execCommand("copy"); ok(); } catch (_) {} ta.remove(); input.focus(); }
+  }
+  const PAGES = [
+    { title: "Home", sub: "The cold open", href: "index.html", kw: "start landing" },
+    { title: "Work", sub: "Projects & case studies", href: "projects.html", kw: "projects systems" },
+    { title: "Patents", sub: "Seven, filed", href: "patents.html", kw: "inventions ip" },
+    { title: "Writing", sub: "Field notes", href: "writing.html", kw: "essays blog notes" },
+    { title: "About", sub: "The last mile", href: "about.html", kw: "bio roshan raj" },
+    { title: "Now", sub: "Current focus", href: "now.html", kw: "current" },
+    { title: "Contact", sub: "Let's talk", href: "contact.html", kw: "email reach hire" },
+  ];
+  const PROJECTS = [
+    { title: "LLM Evaluation Framework", sub: "In development", href: "project-llm-eval.html", kw: "eval ml flagship statistics" },
+    { title: "Acoustic AMS", sub: "Deployed", href: "project-acoustic-ams.html", kw: "attendance authentication acoustic" },
+    { title: "On-Premise SRE Engine", sub: "Research", href: "project-sre-engine.html", kw: "mlx air-gapped remediation" },
+    { title: "Finance OS", sub: "Research", href: "project-finance-os.html", kw: "macos cash flow liquidity" },
+    { title: "Quantitative Signal Engine", sub: "Research", href: "project-quant-signal.html", kw: "quant trading signals" },
+  ];
+  const PATENTS = [
+    { title: "Privacy-Preserving Crash Reproduction", sub: "No. 01 · Privacy", href: "patents.html#patent-01" },
+    { title: "Semantic Clipboard", sub: "No. 02 · Systems", href: "patents.html#patent-02" },
+    { title: "Negative-Latency Collaborative Editing", sub: "No. 03 · Distributed systems", href: "patents.html#patent-03" },
+    { title: "On-Device Pre-Update Regression Certification", sub: "No. 04 · Privacy / ML", href: "patents.html#patent-04" },
+    { title: "Unified Fidelity-Budget Scheduler", sub: "No. 05 · ML infrastructure", href: "patents.html#patent-05" },
+    { title: "Acoustic Proximity Authentication", sub: "No. 06 · Security", href: "patents.html#patent-06" },
+    { title: "Dynamically Morphing Ergonomic Keyboard", sub: "No. 07 · Embedded hardware", href: "patents.html#patent-07" },
+  ];
+  const ACTIONS = [
+    { title: "Book a live demo", sub: "Pick a time with Roshan", kw: "demo book call meeting calendar schedule", run: () => { closePalette(); openBooking(null); } },
+    { title: "Email Roshan", sub: EMAIL, href: "mailto:" + EMAIL, kw: "contact reach message" },
+    { title: "Copy email address", sub: EMAIL, kw: "clipboard", run: () => copyEmail() },
+    { title: "GitHub", sub: "github.com/roshworldwide", href: "https://github.com/roshworldwide", external: true, kw: "code repos source" },
+    { title: "LinkedIn", sub: "linkedin.com/in/roshworldwide", href: "https://linkedin.com/in/roshworldwide", external: true, kw: "profile" },
+    { title: "X", sub: "x.com/roshworldwide", href: "https://x.com/roshworldwide", external: true, kw: "twitter" },
+  ];
+  const GROUPS = [{ name: "Pages", items: PAGES }, { name: "Projects", items: PROJECTS }, { name: "Patents", items: PATENTS }, { name: "Actions", items: ACTIONS }];
+
+  function fuzzy(q, text) {
+    const t = text.toLowerCase(); let qi = 0, score = 0, prev = -2; const idx = [];
+    for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+      if (t[ti] === q[qi]) { let bonus = 1; if (ti === 0 || /[\s\-_/.]/.test(t[ti - 1])) bonus += 4; if (prev === ti - 1) bonus += 3; score += bonus; idx.push(ti); prev = ti; qi++; }
+    }
+    return qi === q.length ? { score, idx } : null;
+  }
+  function rank(q, item) {
+    const fT = fuzzy(q, item.title); if (fT) return { score: fT.score + 20, idx: fT.idx };
+    const fH = fuzzy(q, item.title + " " + (item.sub || "") + " " + (item.kw || "")); return fH ? { score: fH.score, idx: [] } : null;
+  }
+  function highlight(title, idx) { if (!idx || !idx.length) return esc(title); const set = new Set(idx); let out = ""; for (let i = 0; i < title.length; i++) out += set.has(i) ? "<mark>" + esc(title[i]) + "</mark>" : esc(title[i]); return out; }
+
+  const pal = el("div", { class: "cmdk", id: "cmdk", role: "dialog", "aria-modal": "true", "aria-label": "Command palette", hidden: "" });
+  pal.innerHTML =
+    '<div class="cmdk__scrim" data-cmdk-close></div>' +
+    '<div class="cmdk__panel" role="document">' +
+      '<div class="cmdk__search">' +
+        '<svg class="cmdk__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>' +
+        '<input id="cmdk-input" type="text" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" aria-label="Search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search pages, projects, patents, actions…" />' +
+        '<kbd class="cmdk__esc">esc</kbd>' +
+      "</div>" +
+      '<ul class="cmdk__list" id="cmdk-list" role="listbox" aria-label="Results"></ul>' +
+      '<div class="cmdk__empty" hidden>No matches. Try “contact”, “acoustic”, or “demo”.</div>' +
+      '<div class="cmdk__foot" aria-hidden="true"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>' +
+      '<p class="visually-hidden" role="status" aria-live="polite" id="cmdk-status"></p>' +
+    "</div>";
+  document.body.appendChild(pal);
+  const input = pal.querySelector("#cmdk-input");
+  const listEl = pal.querySelector("#cmdk-list");
+  const emptyEl = pal.querySelector(".cmdk__empty");
+  const statusEl = pal.querySelector("#cmdk-status");
+  let flat = [], active = -1, palReturn = null, lastQuery = "";
+
+  function announce(msg) { if (statusEl) statusEl.textContent = msg; }
+  function setActive(i) {
+    if (active >= 0 && flat[active]) flat[active].li.setAttribute("aria-selected", "false");
+    active = i;
+    if (i >= 0 && flat[i]) { flat[i].li.setAttribute("aria-selected", "true"); input.setAttribute("aria-activedescendant", flat[i].id); flat[i].li.scrollIntoView({ block: "nearest" }); }
+    else input.removeAttribute("aria-activedescendant");
+  }
+  function render(q) {
+    q = (q || "").trim().toLowerCase();
+    listEl.innerHTML = ""; flat = []; let n = 0;
+    // punctuation-only query -> empty (avoids scattered cross-keyword noise)
+    const punctOnly = q && !/[a-z0-9]/.test(q);
+    if (!punctOnly) GROUPS.forEach((g) => {
+      let matched;
+      if (!q) matched = g.items.map((item) => ({ item, idx: [] }));
+      else matched = g.items.map((item) => { const r = rank(q, item); return r ? { item, idx: r.idx, score: r.score } : null; }).filter(Boolean).sort((a, b) => b.score - a.score);
+      if (!matched.length) return;
+      const head = el("li", { class: "cmdk__group", role: "presentation" }); head.textContent = g.name; listEl.appendChild(head);
+      matched.forEach((m) => {
+        const id = "cmdk-opt-" + (n++); const li = el("li", { class: "cmdk__opt", role: "option", id, "aria-selected": "false" });
+        li.innerHTML = '<span class="cmdk__opt-title">' + highlight(m.item.title, m.idx) + "</span>" + (m.item.sub ? '<span class="cmdk__opt-sub">' + esc(m.item.sub) + "</span>" : "");
+        const myItem = m.item;
+        li.addEventListener("mousemove", () => { const k = flat.findIndex((f) => f.li === li); if (k !== active) setActive(k); });
+        li.addEventListener("click", () => activate(myItem));
+        listEl.appendChild(li); flat.push({ item: myItem, li, id });
+      });
+    });
+    const total = flat.length;
+    emptyEl.hidden = total > 0;
+    input.setAttribute("aria-expanded", total > 0 ? "true" : "false");
+    setActive(total ? 0 : -1);
+    announce(total ? total + (total > 1 ? " results" : " result") : "No matches. Try contact, acoustic, or demo.");
+  }
+  function activate(item) {
+    if (!item) return;
+    if (item.run) { item.run(); return; }
+    if (!item.href) return;
+    if (item.external) { window.open(item.href, "_blank", "noopener"); closePalette(); }
+    else { closePalette(); window.location.href = item.href; }
+  }
+  function openPalette() {
+    if (!pal.hidden || document.body.classList.contains("menu-open") || !bk.hidden) return; // don't stack over the menu or booking dialog
+    palReturn = document.activeElement;
+    pal.hidden = false; void pal.offsetHeight; pal.classList.add("is-open");
+    setBodyLock();
+    input.value = lastQuery; render(lastQuery); input.focus(); input.select();
+  }
+  function closePalette() {
+    if (pal.hidden) return;
+    lastQuery = input.value; pal.classList.remove("is-open"); pal.hidden = true;
+    setBodyLock();
+    if (palReturn && palReturn.focus) palReturn.focus();
+  }
+  input.addEventListener("input", () => render(input.value));
+  pal.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); if (flat.length) setActive((active + 1) % flat.length); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); if (flat.length) setActive((active - 1 + flat.length) % flat.length); }
+    else if (e.key === "Home" && flat.length) { e.preventDefault(); setActive(0); }
+    else if (e.key === "End" && flat.length) { e.preventDefault(); setActive(flat.length - 1); }
+    else if (e.key === "Enter") { e.preventDefault(); if (active >= 0 && flat[active]) activate(flat[active].item); }
+    else if (e.key === "Tab") { e.preventDefault(); }
   });
+  pal.addEventListener("click", (e) => { if (e.target.closest("[data-cmdk-close]")) closePalette(); });
+  document.addEventListener("keydown", (e) => {
+    if (document.body.classList.contains("menu-open") || !bk.hidden) return; // menu or booking dialog owns the screen
+    if ((e.metaKey || e.ctrlKey) && !e.altKey && (e.key === "k" || e.key === "K")) { e.preventDefault(); pal.hidden ? openPalette() : closePalette(); }
+  });
+
+  const navEl = document.querySelector(".nav");
+  if (navEl) {
+    const pill = el("button", { class: "cmdk-pill", type: "button", "aria-label": "Open command palette", "aria-keyshortcuts": isMac ? "Meta+K" : "Control+K" });
+    pill.innerHTML = '<svg class="cmdk-pill__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span class="cmdk-pill__keys" aria-hidden="true">' + (isMac ? "⌘" : "Ctrl") + "<span>K</span></span>";
+    pill.addEventListener("click", openPalette);
+    const actions = navEl.querySelector(".nav__actions");
+    if (actions) navEl.insertBefore(pill, actions); else navEl.appendChild(pill);
+  }
 })();
 
 /* ============================================================
