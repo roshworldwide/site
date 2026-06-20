@@ -1,0 +1,8 @@
+{
+  "name": "roshworldwide",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "roshworldwide.com — static site + self-hosted booking (Vercel serverless, zero runtime deps).",
+  "engines": { "node": ">=18" }
+}

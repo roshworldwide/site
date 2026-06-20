@@ -1,0 +1,7 @@
+# Source-only media (originals / extraction inputs) — never ship these.
+Firefly*.mov
+finalvideo.mov
+finalvideo.mp4
+RoShGenMoji.png
+.DS_Store
+BOOKING_SETUP.md
