@@ -9,13 +9,11 @@
   <meta name="color-scheme" content="dark" />
   <link rel="canonical" href="https://roshworldwide.com/" />
 
-  <!-- Favicon / app icons (RoSh monogram) -->
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="assets/icons/favicon.ico" sizes="32x32" />
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
   <link rel="manifest" href="site.webmanifest" />
 
-  <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Roshan Raj" />
   <meta property="og:url" content="https://roshworldwide.com/" />
@@ -30,11 +28,9 @@
   <meta name="twitter:description" content="Air-gapped AI, quant ML, and on-device systems. Inventor on 7 patent applications." />
   <meta name="twitter:image" content="https://roshworldwide.com/assets/og.png" />
 
-  <!-- Type: SF Pro via the system font stack (no web-font dependency) -->
   <link rel="preload" as="image" href="assets/sequence/poster.webp" fetchpriority="high" />
   <link rel="stylesheet" href="assets/css/style.css" />
 
-  <!-- Structured data: Person + selected work + patent applications -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -90,15 +86,12 @@
 <body>
   <a class="skip-link" href="#top">Skip to content</a>
 
-  <!-- Fixed film-grain overlay (perf-safe: fixed, pointer-events-none) -->
   <div class="grain" aria-hidden="true"></div>
-  <!-- Ambient aurora field -->
   <div class="aurora" aria-hidden="true">
     <span class="orb orb--a"></span>
     <span class="orb orb--b"></span>
   </div>
 
-  <!-- ============ NAV ============ -->
   <header class="nav-shell">
     <nav class="nav" aria-label="Primary">
       <a class="nav__brand" href="#top" data-magnetic aria-label="RoSh, home">
@@ -126,7 +119,6 @@
     </nav>
   </header>
 
-  <!-- Mobile full-screen menu -->
   <div class="nav-overlay" id="nav-overlay" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" tabindex="-1">
     <ul class="nav-overlay__links">
       <li style="--i:0"><a href="#work" data-overlay-link>Work</a></li>
@@ -141,14 +133,8 @@
   </div>
 
   <main id="top" tabindex="-1">
-    <!-- ============ OPENING: hero fused into the scroll sequence ============ -->
-    <!-- One continuous open: the headline rests on the blacked-out first frame, then -->
-    <!-- parallaxes out as the 227-frame WebP reel lights up. Everything below is driven -->
-    <!-- by seqTick's scroll progress p (no extra scroll listener / rAF). In reduced-motion -->
-    <!-- or on small screens .seq__hero flows as a normal static hero above the poster. -->
     <section class="seq" id="sequence" aria-labelledby="hero-title">
       <div class="seq__pin">
-        <!-- headline overlay: real DOM, the page's only h1; first child so it flows first when static -->
         <div class="seq__hero" id="seq-hero">
           <div class="hero__inner">
             <p class="eyebrow reveal" data-reveal>Systems &amp; ML Engineer · Inventor</p>
@@ -177,11 +163,8 @@
         <img class="seq__poster" src="assets/sequence/poster.webp" alt="" aria-hidden="true" width="1280" height="720" decoding="async" />
         <canvas class="seq__canvas" id="seq-canvas" aria-hidden="true"></canvas>
         <div class="seq__veil" aria-hidden="true"></div>
-        <!-- opening curtain: near-opaque Vault at rest so the headline reads on near-black; -->
-        <!-- JS lifts its opacity to 0 by p~=0.20 so the reel brightens as you descend -->
         <div class="seq__open" id="seq-open" aria-hidden="true"></div>
 
-        <!-- chapters: cross-fade later in the scroll; headline owns the opening -->
         <div class="seq__chapters">
           <div class="seq__chapter" data-at="0.40"><h2 class="display">From prototype</h2><p>where the idea begins.</p></div>
           <div class="seq__chapter" data-at="0.66"><h2 class="display">To production</h2><p>fast, reliable, real.</p></div>
@@ -194,18 +177,15 @@
           <span class="seq__loader-num" id="seq-loader-num">0</span><span class="seq__loader-pct">%</span>
         </div>
 
-        <!-- restrained scroll cue at rest; JS fades it on the first scroll -->
         <div class="seq__cue" id="seq-cue" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </div>
       </div>
     </section>
 
-    <!-- ============ TECH MARQUEE (single marquee on page) ============ -->
     <section class="marquee-sec" aria-label="Tools and technologies">
       <div class="marquee" data-marquee>
         <div class="marquee__track">
-          <!-- duplicated in JS for seamless loop; logos self-hosted in assets/icons/ -->
           <img src="assets/icons/python.svg" alt="Python" width="26" height="26" loading="lazy" decoding="async" />
           <img src="assets/icons/pytorch.svg" alt="PyTorch" width="26" height="26" loading="lazy" decoding="async" />
           <img src="assets/icons/huggingface.svg" alt="Hugging Face" width="26" height="26" loading="lazy" decoding="async" />
@@ -222,7 +202,6 @@
       </div>
     </section>
 
-    <!-- ============ SELECTED WORK (asymmetric bento) ============ -->
     <section class="work shell" id="work" aria-labelledby="work-title">
       <header class="sec-head">
         <p class="eyebrow" data-reveal>
@@ -233,7 +212,6 @@
         </h2>
       </header>
 
-      <!-- Real projects. Honest status pills; no links until a repo is public. -->
       <div class="bento">
         <article class="card card--feature">
           <div class="card__inner" data-tilt>
@@ -312,7 +290,6 @@
       </div>
     </section>
 
-    <!-- ============ PATENTS (the quiet centerpiece) ============ -->
     <section class="patents shell" id="patents" aria-labelledby="patents-title">
       <header class="sec-head patents__head">
         <p class="eyebrow" data-reveal>Inventions</p>
@@ -395,7 +372,6 @@
       </div>
     </section>
 
-    <!-- ============ ABOUT (portrait + statement + organic stats) ============ -->
     <section class="about shell" id="about" aria-labelledby="about-title">
       <div class="about__grid">
         <div class="about__media reveal" data-reveal>
@@ -445,7 +421,6 @@
       </div>
     </section>
 
-    <!-- ============ CAPABILITIES (editorial interactive list) ============ -->
     <section class="caps shell" id="capabilities" aria-labelledby="caps-title">
       <header class="sec-head">
         <h2 class="sec-title display reveal-wipe" id="caps-title" data-reveal><span class="wipe-line">What I do.</span></h2>
@@ -478,7 +453,6 @@
       </ul>
     </section>
 
-    <!-- ============ CONTACT (closing manifesto) ============ -->
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <div class="shell contact__inner">
         <h2 class="contact__title display" id="contact-title" data-reveal>
@@ -498,7 +472,6 @@
     </section>
   </main>
 
-  <!-- ============ FOOTER ============ -->
   <footer class="footer shell">
     <div class="footer__top">
       <a class="footer__brand" href="#top">

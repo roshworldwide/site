@@ -1,23 +1,12 @@
-/* ============================================================
-   RoSh - Portfolio interactions
-   Motion policy (per taste-skill):
-   - reveals via IntersectionObserver
-   - scroll-linked work via a single requestAnimationFrame loop
-     (no window 'scroll' listener, no per-frame state churn)
-   - transform / opacity only
-   - everything degrades under prefers-reduced-motion
-   ============================================================ */
 (() => {
   "use strict";
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = window.matchMedia("(pointer: fine)").matches;
 
-  /* ---------- Footer year ---------- */
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  /* ---------- Reveal on scroll ---------- */
   const revealEls = document.querySelectorAll("[data-reveal]");
   if (reduceMotion || !("IntersectionObserver" in window)) {
     revealEls.forEach((el) => el.classList.add("is-in"));
@@ -36,7 +25,6 @@
     revealEls.forEach((el) => ro.observe(el));
   }
 
-  /* ---------- Mobile menu (focus-managed dialog) ---------- */
   const burger = document.getElementById("nav-burger");
   const overlay = document.getElementById("nav-overlay");
   let lastFocused = null;
@@ -52,7 +40,6 @@
     if (overlay) overlay.setAttribute("aria-hidden", String(!open));
     if (open) {
       lastFocused = document.activeElement;
-      // focus the dialog container (always visible immediately; SR announces the menu)
       requestAnimationFrame(() => { if (overlay) overlay.focus(); });
     } else if (lastFocused && typeof lastFocused.focus === "function") {
       lastFocused.focus();
@@ -72,20 +59,17 @@
     }
   });
 
-  /* ---------- Marquee: clone track for seamless loop (clone hidden from AT) ---------- */
   document.querySelectorAll("[data-marquee] .marquee__track").forEach((track) => {
     const clone = document.createElement("span");
     clone.setAttribute("aria-hidden", "true");
-    clone.style.display = "contents"; // children stay direct flex participants
-    clone.innerHTML = track.innerHTML; // visual duplicate so translateX(-50%) loops seamlessly
+    clone.style.display = "contents";
+    clone.innerHTML = track.innerHTML;
     track.appendChild(clone);
-    // graceful fallback: if a CDN logo ever 404s, hide it instead of showing a broken glyph
     track.querySelectorAll("img").forEach((img) => {
       img.addEventListener("error", () => { img.style.display = "none"; });
     });
   });
 
-  /* ---------- Magnetic elements ---------- */
   if (finePointer && !reduceMotion) {
     document.querySelectorAll("[data-magnetic]").forEach((el) => {
       const strength = 0.3;
@@ -98,9 +82,8 @@
       el.addEventListener("pointerleave", () => { el.style.transform = ""; });
     });
 
-    /* ---------- Subtle tilt ---------- */
     document.querySelectorAll("[data-tilt]").forEach((el) => {
-      const max = 6; // degrees
+      const max = 6;
       el.addEventListener("pointermove", (e) => {
         const r = el.getBoundingClientRect();
         const px = (e.clientX - r.left) / r.width - 0.5;
@@ -111,7 +94,6 @@
     });
   }
 
-  /* ---------- Scroll-scrubbed image sequence (Apple-style; hooks the shared rAF) ---------- */
   let seqTick = null;
   (function initSequence() {
     const section = document.getElementById("sequence");
@@ -120,17 +102,13 @@
     const ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
     const small = window.matchMedia("(max-width: 760px)").matches;
 
-    // Static fallback: poster + stacked chapters. No pin, no preload, no scrub.
-    // NOTE: do NOT gate on pointer:coarse - touchscreen laptops report coarse but
-    // have full-size screens and handle the scrub fine. Only true small screens
-    // (phones) and reduced-motion get the static poster.
     if (reduceMotion || !ctx || small) {
       section.classList.add("is-static");
       section.querySelectorAll(".seq__chapter").forEach((c) => c.classList.add("is-active"));
       return;
     }
 
-    const FRAMES = 227; // actual count produced in assets/sequence/ (Firefly 4K source, 24fps native)
+    const FRAMES = 227;
     const pad = (n) => String(n).padStart(3, "0");
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
@@ -139,18 +117,18 @@
     let decoded = 0;
     let ready = false;
     let lastDrawn = -1;
-    let cur = 0;        // lerped float frame index
-    let primed = false; // snap to target on first paint
+    let cur = 0;
+    let primed = false;
     let prevIdx = 0;
-    const decodedSet = new Set(); // frames we've asked the browser to pre-decode
+    const decodedSet = new Set();
 
     const loaderNum = document.getElementById("seq-loader-num");
     const railFill = document.getElementById("seq-rail");
-    const heroEl = document.getElementById("seq-hero");   // headline overlay (parallaxes out)
-    const openEl = document.getElementById("seq-open");   // opening curtain (reel lights up)
-    const cueEl = document.getElementById("seq-cue");      // scroll cue (fades on first scroll)
-    let heroGone = false;                                  // pointer-events handoff past the fade
-    const easeOut = (t) => 1 - Math.pow(1 - t, 3);         // smooth, no overshoot
+    const heroEl = document.getElementById("seq-hero");
+    const openEl = document.getElementById("seq-open");
+    const cueEl = document.getElementById("seq-cue");
+    let heroGone = false;
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3);
     const vh = () => window.innerHeight || 1;
     const chapters = Array.from(section.querySelectorAll(".seq__chapter")).map((el) => ({
       el, at: parseFloat(el.dataset.at), active: false,
@@ -161,13 +139,13 @@
       const r = canvas.getBoundingClientRect();
       canvas.width = Math.max(1, Math.round(r.width * dpr));
       canvas.height = Math.max(1, Math.round(r.height * dpr));
-      lastDrawn = -1; // force a redraw at the new backing size
+      lastDrawn = -1;
     }
     function draw(idx) {
       const img = images[idx];
       if (!img || !loaded[idx]) return;
       const iw = img.naturalWidth, ih = img.naturalHeight;
-      const scale = Math.max(canvas.width / iw, canvas.height / ih); // cover-fit
+      const scale = Math.max(canvas.width / iw, canvas.height / ih);
       const dw = iw * scale, dh = ih * scale;
       ctx.drawImage(img, (canvas.width - dw) / 2, (canvas.height - dh) / 2, dw, dh);
       lastDrawn = idx;
@@ -180,8 +158,6 @@
       }
       return -1;
     }
-    // pre-decode upcoming frames in the travel direction so high-res draws never block on decode
-    // (window kept modest: each 2560x1440 frame is ~14MB decoded, so don't over-warm)
     function warm(idx, dir) {
       for (let k = -1; k <= 8; k++) {
         const j = idx + k * dir;
@@ -207,10 +183,8 @@
       img.src = `assets/sequence/frame_${pad(i + 1)}.webp`;
       images[i] = img;
     }
-    // Sequence is the opening section now, so preload immediately (nothing competes above it).
     for (let i = 0; i < FRAMES; i++) load(i);
 
-    // Only do work while the section is near/in the viewport.
     let inView = false;
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
@@ -228,33 +202,25 @@
       const dist = r.height - window.innerHeight;
       const p = dist > 0 ? Math.min(1, Math.max(0, -r.top / dist)) : 0;
 
-      /* ---- opening handoff: runs regardless of frame-decode `ready` so the headline
-              lifts and the curtain lights up even while frames are still warming ---- */
-      // hero parallaxes out over the first ~18%: up ~10vh, fades, scales 1 -> .965
       const out = easeOut(Math.min(1, p / 0.18));
       if (heroEl) {
         heroEl.style.opacity = (1 - out).toFixed(3);
         heroEl.style.transform =
           `translate3d(0, ${(-out * vh() * 0.10).toFixed(1)}px, 0) scale(${(1 - out * 0.035).toFixed(4)})`;
-        const gone = p > 0.16; // stop intercepting clicks once the headline is essentially gone
+        const gone = p > 0.16;
         if (gone !== heroGone) { heroGone = gone; heroEl.classList.toggle("is-gone", gone); }
       }
-      // curtain lifts: full Vault at p=0 -> clear by p~=0.20 (reel brightens in)
       if (openEl) openEl.style.opacity = ((1 - easeOut(Math.min(1, p / 0.20))) * 0.97).toFixed(3);
-      // scroll cue fades out after the first nudge
       if (cueEl) cueEl.style.opacity = Math.max(0, 1 - p / 0.045).toFixed(3);
-      // progress rail + chapter cross-fades (transform/opacity only)
       if (railFill) railFill.style.transform = `scaleX(${p.toFixed(4)})`;
       for (const c of chapters) {
-        const on = Math.abs(p - c.at) < 0.14; // tighter window so the headline owns the opening
+        const on = Math.abs(p - c.at) < 0.14;
         if (on !== c.active) { c.active = on; c.el.classList.toggle("is-active", on); }
       }
 
-      /* ---- canvas scrub: the only part gated on frames being decodable ---- */
       if (!ready) return;
       const target = p * (FRAMES - 1);
       if (!primed) { cur = target; primed = true; }
-      // lerp toward target -> weighted, silky scrubbing; snappy enough to not feel laggy
       cur += (target - cur) * 0.18;
       if (Math.abs(target - cur) < 0.4) cur = target;
       const idx = Math.min(FRAMES - 1, Math.max(0, Math.round(cur)));
@@ -266,10 +232,9 @@
     };
   })();
 
-  /* ---------- Scroll choreography: Work + Patents (hooks the shared frame(); transform/opacity only) ---------- */
   let choreoTick = null;
   if (!reduceMotion) {
-    document.documentElement.classList.add("choreo"); // arms hidden start-states in CSS
+    document.documentElement.classList.add("choreo");
     const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
     const easeOut = (t) => 1 - Math.pow(1 - t, 3);
     const groups = [];
@@ -287,7 +252,6 @@
       } else { g.inView = true; }
       groups.push(g);
     };
-    // feature card is first in DOM -> leads the cascade
     addGroup("#work .bento > .card", "#work .bento", { stagger: 0.09, win: 0.55, rise: 44, parallax: true });
     addGroup("#patents .patent", "#patents .patents__grid", { stagger: 0.07, win: 0.5, rise: 38, underline: true });
 
@@ -296,9 +260,8 @@
       for (const g of groups) {
         if (!g.inView) continue;
         const r = g.section.getBoundingClientRect();
-        // section progress: begins as its top passes ~92% vh, completes near ~40% vh
         const sp = clamp01((H * 0.92 - r.top) / (H * 0.52));
-        if (sp === g._lastSp) continue; // idle: nothing to repaint
+        if (sp === g._lastSp) continue;
         g._lastSp = sp;
         for (let i = 0; i < g.items.length; i++) {
           const el = g.items[i];
@@ -308,8 +271,8 @@
           el.style.transform = `translate3d(0, ${((1 - e) * g.rise).toFixed(1)}px, 0) scale(${(0.965 + e * 0.035).toFixed(4)})`;
           if (g.parallax) {
             const cr = el.getBoundingClientRect();
-            const rel = (cr.top + cr.height / 2 - H / 2) / H; // -0.5 .. 0.5
-            el.style.setProperty("--mpy", (-rel * 16).toFixed(1) + "px"); // <= +-8px drift
+            const rel = (cr.top + cr.height / 2 - H / 2) / H;
+            el.style.setProperty("--mpy", (-rel * 16).toFixed(1) + "px");
           }
           if (g.underline) {
             const shown = cp > 0.5;
@@ -319,7 +282,6 @@
       }
     };
 
-    // one-time gold "scan" hairline as the patents grid enters
     const pgrid = document.querySelector("#patents .patents__grid");
     if (pgrid && "IntersectionObserver" in window) {
       const sio = new IntersectionObserver((es) => {
@@ -334,7 +296,6 @@
       sio.observe(pgrid);
     }
 
-    // cursor-follow specular highlight on Work cards (fine pointer only)
     if (finePointer) {
       document.querySelectorAll("#work .bento > .card").forEach((card) => {
         card.addEventListener("pointermove", (e) => {
@@ -346,7 +307,6 @@
     }
   }
 
-  /* ---------- Single rAF loop: nav state + ambient parallax + sequence ---------- */
   const navShell = document.querySelector(".nav-shell");
   const orbA = document.querySelector(".orb--a");
   const orbB = document.querySelector(".orb--b");
@@ -372,7 +332,6 @@
   }
   if (!reduceMotion) requestAnimationFrame(frame);
   else if (navShell) {
-    // still toggle nav background without animation loop
     navShell.classList.toggle("is-scrolled", window.scrollY > 16);
   }
 })();
